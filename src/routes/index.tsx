@@ -7,6 +7,11 @@ import { Clients } from "@/components/sections/Clients";
 import { Projects } from "@/components/sections/Projects";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { CTA } from "@/components/sections/CTA";
+import { Stats } from "@/components/sections/Stats";
+import { WhyUs } from "@/components/sections/WhyUs";
+import { Process } from "@/components/sections/Process";
+import { Blog } from "@/components/sections/Blog";
+import { Newsletter } from "@/components/sections/Newsletter";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -24,11 +29,16 @@ function Index() {
   return (
     <SiteLayout>
       <Hero />
+      <Stats />
       <Services />
       <Clients />
+      <WhyUs />
       <Technologies />
+      <Process />
       <Projects />
+      <Blog />
       <Testimonials />
+      <Newsletter />
       <CTA />
     </SiteLayout>
   );

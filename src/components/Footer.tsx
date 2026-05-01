@@ -7,17 +7,17 @@ const cols = [
     links: [
       { to: "/about", label: "About" },
       { to: "/team", label: "Team" },
-      { to: "/projects", label: "Work" },
-      { to: "/pricing", label: "Pricing" },
+      { to: "/careers", label: "Careers" },
+      { to: "/faq", label: "FAQ" },
     ],
   },
   {
-    title: "Services",
+    title: "Work",
     links: [
-      { to: "/services", label: "Web Development" },
-      { to: "/services", label: "Mobile Apps" },
-      { to: "/services", label: "AI Integration" },
-      { to: "/services", label: "SaaS Platforms" },
+      { to: "/services", label: "Services" },
+      { to: "/projects", label: "Portfolio" },
+      { to: "/pricing", label: "Pricing" },
+      { to: "/blog", label: "Blog" },
     ],
   },
   {
@@ -25,9 +25,16 @@ const cols = [
     links: [
       { to: "/contact", label: "Start a project" },
       { to: "/contact", label: "hello@synapex.dev" },
-      { to: "/admin", label: "Admin" },
+      { to: "/admin", label: "Admin portal" },
     ],
   },
+];
+
+const socials = [
+  { Icon: Github, href: "https://github.com/synapex-dev", label: "GitHub" },
+  { Icon: Twitter, href: "https://twitter.com/synapex_dev", label: "Twitter" },
+  { Icon: Linkedin, href: "https://linkedin.com/company/synapex", label: "LinkedIn" },
+  { Icon: Instagram, href: "https://instagram.com/synapex_dev", label: "Instagram" },
 ];
 
 export function Footer() {
@@ -44,11 +51,17 @@ export function Footer() {
             <p className="mt-5 text-sm text-white/50 max-w-sm leading-relaxed">
               Engineering premium software, AI systems and digital experiences for ambitious teams worldwide.
             </p>
+            <p className="mt-3 text-xs text-white/30">
+              Harare, Zimbabwe &middot; Remote-first
+            </p>
             <div className="mt-6 flex gap-2">
-              {[Github, Twitter, Linkedin, Instagram].map((Icon, i) => (
+              {socials.map(({ Icon, href, label }) => (
                 <a
-                  key={i}
-                  href="#"
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={label}
                   className="h-9 w-9 rounded-full glass hairline-hover flex items-center justify-center transition-all hover:-translate-y-0.5"
                 >
                   <Icon className="h-4 w-4" />
@@ -63,7 +76,7 @@ export function Footer() {
               <ul className="space-y-2.5 text-sm">
                 {col.links.map((l, i) => (
                   <li key={i}>
-                    <Link to={l.to} className="text-white/70 hover:text-white transition-colors story-link">
+                    <Link to={l.to as any} className="text-white/70 hover:text-white transition-colors story-link">
                       {l.label}
                     </Link>
                   </li>

@@ -12,13 +12,14 @@ export const Route = createFileRoute("/admin")({
 });
 
 const TABLES = [
-  { key: "services", label: "Services", fields: ["title", "description", "icon", "sort_order"] },
-  { key: "projects", label: "Projects", fields: ["title", "category", "description", "image_url", "tech", "live_url", "github_url", "sort_order"] },
-  { key: "tech_stack", label: "Tech Stack", fields: ["name", "category", "sort_order"] },
-  { key: "clients", label: "Clients", fields: ["name", "logo_url", "website_url", "sort_order"] },
-  { key: "testimonials", label: "Testimonials", fields: ["name", "role", "quote", "rating", "avatar_url", "sort_order"] },
-  { key: "team_members", label: "Team", fields: ["name", "role", "bio", "image_url", "twitter_url", "linkedin_url", "github_url", "sort_order"] },
-  { key: "pricing_plans", label: "Pricing", fields: ["name", "price", "description", "features", "is_popular", "sort_order"] },
+  { key: "services", label: "Services", fields: ["title", "description", "icon", "sort_order"], orderBy: "sort_order" },
+  { key: "projects", label: "Projects", fields: ["title", "category", "description", "image_url", "tech", "live_url", "github_url", "sort_order"], orderBy: "sort_order" },
+  { key: "tech_stack", label: "Tech Stack", fields: ["name", "category", "sort_order"], orderBy: "sort_order" },
+  { key: "clients", label: "Clients", fields: ["name", "logo_url", "website_url", "sort_order"], orderBy: "sort_order" },
+  { key: "testimonials", label: "Testimonials", fields: ["name", "role", "quote", "rating", "avatar_url", "sort_order"], orderBy: "sort_order" },
+  { key: "team_members", label: "Team", fields: ["name", "role", "bio", "image_url", "twitter_url", "linkedin_url", "github_url", "sort_order"], orderBy: "sort_order" },
+  { key: "pricing_plans", label: "Pricing", fields: ["name", "price", "description", "features", "is_popular", "sort_order"], orderBy: "sort_order" },
+  { key: "blog_posts", label: "Blog Posts", fields: ["title", "slug", "summary", "content", "author", "category", "image_url", "published"], orderBy: "created_at" },
 ];
 
 type Toast = { id: number; type: "success" | "error"; message: string };
@@ -88,7 +89,10 @@ function AdminPage() {
   async function loadTab(t: string) {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from(t as any).select("*").order("sort_order", { ascending: true });
+      const tableConfig = TABLES.find((x) => x.key === t);
+      const orderBy = tableConfig?.orderBy || "sort_order";
+      const ascending = orderBy !== "created_at";
+      const { data, error } = await supabase.from(t as any).select("*").order(orderBy, { ascending });
       if (error) addToast("error", `Load failed: ${error.message}`);
       else setRows(data || []);
     } catch (e: any) {
@@ -115,12 +119,13 @@ function AdminPage() {
   async function add() {
     setLoading(true);
     try {
-      const blank: any = { sort_order: rows.length };
-      const fields = TABLES.find((t) => t.key === tab)!.fields;
-      fields.forEach((f) => {
-        if (!(f in blank)) blank[f] = f === "tech" || f === "features" ? [] : f === "is_popular" ? false : f === "rating" ? 5 : "";
+      const tableConfig = TABLES.find((t) => t.key === tab)!;
+      const blank: any = tableConfig.orderBy === "sort_order" ? { sort_order: rows.length } : {};
+      tableConfig.fields.forEach((f) => {
+        if (!(f in blank)) blank[f] = f === "tech" || f === "features" ? [] : f === "is_popular" || f === "published" ? false : f === "rating" ? 5 : "";
       });
       if (tab === "services") blank.icon = "Code2";
+      if (tab === "blog_posts") { blank.slug = `post-${Date.now()}`; blank.published = false; blank.author = "Synapex Team"; }
       const { error } = await supabase.from(tab as any).insert(blank);
       if (error) addToast("error", `Add failed: ${error.message}`);
       else { addToast("success", "Added new row"); await loadTab(tab); }
@@ -310,17 +315,25 @@ function AdminPage() {
                             const display = Array.isArray(val)
                               ? (f === "features" ? val.join("\n") : val.join(", "))
                               : val ?? "";
-                            const isLong = f === "description" || f === "bio" || f === "quote" || f === "features";
+                            const isLong = f === "description" || f === "bio" || f === "quote" || f === "features" || f === "summary";
+                            const isContent = f === "content";
+                            const isBool = f === "is_popular" || f === "published";
                             return (
-                              <div key={f} className={isLong ? "sm:col-span-2" : ""}>
+                              <div key={f} className={isLong || isContent ? "sm:col-span-2" : ""}>
                                 <label className="text-[10px] uppercase tracking-wider text-white/40 mb-1 block">{f.replace(/_/g, " ")}</label>
-                                {f === "is_popular" ? (
+                                {isBool ? (
                                   <div className="flex items-center gap-2">
                                     <input type="checkbox" checked={!!val}
                                       onChange={(e) => { const next = [...rows]; next[idx][f] = e.target.checked; setRows(next); }}
                                       className="h-4 w-4 accent-white" />
-                                    <span className="text-sm text-white/60">{val ? "Popular" : "Standard"}</span>
+                                    <span className="text-sm text-white/60">
+                                      {f === "published" ? (val ? "Published" : "Draft") : (val ? "Popular" : "Standard")}
+                                    </span>
                                   </div>
+                                ) : isContent ? (
+                                  <textarea value={display} rows={10}
+                                    onChange={(e) => { const next = [...rows]; next[idx][f] = e.target.value; setRows(next); }}
+                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm focus:border-white/40 outline-none transition-colors resize-y font-mono" />
                                 ) : isLong ? (
                                   <textarea value={display} rows={3}
                                     onChange={(e) => { const next = [...rows]; next[idx][f] = e.target.value; setRows(next); }}
