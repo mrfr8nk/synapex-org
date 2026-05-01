@@ -41,11 +41,15 @@ export const Route = createRootRoute({
       { title: "Synapex Developers — We Build Powerful Digital Experiences" },
       { name: "description", content: "Synapex Developers builds premium websites, mobile apps, AI systems and software for ambitious teams worldwide." },
       { name: "author", content: "Synapex Developers" },
-      { property: "og:title", content: "Synapex Developers" },
-      { property: "og:description", content: "African innovation, global standards. Web, mobile, AI and software solutions." },
+      { property: "og:title", content: "Synapex Developers — We Build Powerful Digital Experiences" },
+      { property: "og:description", content: "Synapex Developers builds premium websites, mobile apps, AI systems and software for ambitious teams worldwide." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "Synapex Developers — We Build Powerful Digital Experiences" },
+      { name: "twitter:description", content: "Synapex Developers builds premium websites, mobile apps, AI systems and software for ambitious teams worldwide." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/e1b14311-a6df-47a5-b0d9-f28b0e06b9ec" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/e1b14311-a6df-47a5-b0d9-f28b0e06b9ec" },
     ],
     links: [
       {
