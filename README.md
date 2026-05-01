@@ -47,7 +47,7 @@ Premium marketing and portfolio website for **Synapex Developers**, a software e
 - Mobile-first — fully responsive at all breakpoints
 
 ### Admin CMS (`/admin`)
-Credentials: `mrfrankofc` / `darlex`
+Demo Credentials: `mrfrankofc` / `1234`
 
 Manage all site content when Supabase is connected:
 - Services, Projects, Tech Stack, Clients
@@ -148,15 +148,15 @@ src/
 
 ## Deployment
 
-Deployed via [Replit Autoscale](https://replit.com). The `dist/` output is served as a static site with SSR entrypoint.
+Deployed via [Render](https://render.com). The `dist/` output is served as a static site with SSR entrypoint.
 
-Production URL: [synapex.replit.app](https://synapex.replit.app)
+Production URL: [synapex.co.zw](https://synapex.co.zw)
 
 ---
 
 ## License
 
-Proprietary. All rights reserved — Synapex Developers © 2025.
+Proprietary. All rights reserved — Synapex Developers © 2026.
 
 ---
 
