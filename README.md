@@ -242,4 +242,4 @@ Proprietary. All rights reserved — Synapex Developers © 2026.
 
 ---
 
-*Built in Harare → shipped to the world.*
+*Built In the Brooks of Chitungwiza → shipped to the world.*
