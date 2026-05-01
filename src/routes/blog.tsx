@@ -9,12 +9,6 @@ import { useState } from "react";
 import { CTA } from "@/components/sections/CTA";
 
 export const Route = createFileRoute("/blog")({
-  head: () => ({
-    meta: [
-      { title: "Blog — Synapex Developers" },
-      { name: "description", content: "Engineering insights, product stories and lessons from building software at Synapex." },
-    ],
-  }),
   component: BlogPage,
 });
 

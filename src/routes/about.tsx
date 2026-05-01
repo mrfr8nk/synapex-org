@@ -7,14 +7,6 @@ import { CTA } from "@/components/sections/CTA";
 import { useSiteContent } from "@/lib/useContent";
 
 export const Route = createFileRoute("/about")({
-  head: () => ({
-    meta: [
-      { title: "About — Synapex Developers" },
-      { name: "description", content: "Young developers from Africa building world-class software with global craftsmanship." },
-      { property: "og:title", content: "About Synapex Developers" },
-      { property: "og:description", content: "Our story, mission and values." },
-    ],
-  }),
   component: AboutPage,
 });
 

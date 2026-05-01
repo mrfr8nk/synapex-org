@@ -14,14 +14,6 @@ import { Blog } from "@/components/sections/Blog";
 import { Newsletter } from "@/components/sections/Newsletter";
 
 export const Route = createFileRoute("/")({
-  head: () => ({
-    meta: [
-      { title: "Synapex Developers — Engineering the future of software" },
-      { name: "description", content: "Premium web, mobile, AI and SaaS development for ambitious teams worldwide." },
-      { property: "og:title", content: "Synapex Developers" },
-      { property: "og:description", content: "African innovation, global standards." },
-    ],
-  }),
   component: Index,
 });
 

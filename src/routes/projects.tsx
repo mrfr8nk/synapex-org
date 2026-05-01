@@ -5,14 +5,6 @@ import { Clients } from "@/components/sections/Clients";
 import { CTA } from "@/components/sections/CTA";
 
 export const Route = createFileRoute("/projects")({
-  head: () => ({
-    meta: [
-      { title: "Work — Synapex Developers" },
-      { name: "description", content: "Selected work from Synapex Developers." },
-      { property: "og:title", content: "Synapex Work" },
-      { property: "og:description", content: "Real products we've designed and shipped." },
-    ],
-  }),
   component: () => (
     <SiteLayout>
       <section className="pt-32 pb-8 px-6 text-center max-w-4xl mx-auto relative">

@@ -7,14 +7,6 @@ import { useTeam } from "@/lib/useContent";
 import { CTA } from "@/components/sections/CTA";
 
 export const Route = createFileRoute("/team")({
-  head: () => ({
-    meta: [
-      { title: "Team — Synapex Developers" },
-      { name: "description", content: "Meet the engineers, designers and PMs at Synapex." },
-      { property: "og:title", content: "Synapex Team" },
-      { property: "og:description", content: "The people behind the products." },
-    ],
-  }),
   component: TeamPage,
 });
 

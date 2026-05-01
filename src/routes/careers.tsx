@@ -8,12 +8,6 @@ import { CTA } from "@/components/sections/CTA";
 import { fallbackCareers } from "@/lib/content";
 
 export const Route = createFileRoute("/careers")({
-  head: () => ({
-    meta: [
-      { title: "Careers — Synapex Developers" },
-      { name: "description", content: "Join the Synapex team. We're hiring engineers, designers and product people who want to build things that matter." },
-    ],
-  }),
   component: CareersPage,
 });
 

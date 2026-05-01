@@ -8,15 +8,14 @@ Premium marketing and portfolio website for **Synapex Developers**, a software e
 
 | Layer | Technology |
 |---|---|
-| Framework | [TanStack Start](https://tanstack.com/start) (SSR + file-based routing) |
-| UI | React 19, [TanStack Router](https://tanstack.com/router) |
+| Framework | React 19 + [Vite](https://vitejs.dev) 7 (SPA) |
+| Routing | [TanStack Router](https://tanstack.com/router) (client-side, file-based) |
 | Styling | Tailwind CSS v4, custom glass/star/grid utility classes |
 | Animations | [Framer Motion](https://www.framer.com/motion/) v12 |
 | Icons | [Lucide React](https://lucide.dev), [Simple Icons CDN](https://simpleicons.org) |
 | Runtime | [Bun](https://bun.sh) |
-| Build | [Vite](https://vitejs.dev) 7 |
 | CMS / Database | [Supabase](https://supabase.com) (optional — graceful fallback) |
-| Deployment | Render (recommended), Replit |
+| Deployment | Render Static Site, Vercel, Cloudflare Pages, Replit |
 
 ---
 
@@ -52,7 +51,11 @@ Demo Credentials: `mrfrankofc` / `1234`
 Manage all site content when Supabase is connected:
 - Services, Projects, Tech Stack, Clients
 - Testimonials, Team Members, Pricing Plans
-- **Blog Posts** (new) — write/edit/publish articles with markdown-style content
+- Blog Posts — write/edit/publish articles with markdown-style content
+- **Visibility toggles** — show/hide any row from the live site
+- **Image uploads** — upload directly to Supabase Storage
+- **Messages inbox** — view/mark-read/reply to contact form submissions
+- **Site Settings** — social links, footer text
 
 When Supabase is not configured, the site renders high-quality fallback content automatically — no blank pages.
 
@@ -69,7 +72,7 @@ bun install
 bun run dev
 ```
 
-App runs on **http://localhost:5000**
+App runs on **http://localhost:5173** (Vite default port).
 
 ---
 
@@ -83,18 +86,26 @@ The site works without Supabase — it uses fallback content. To enable the CMS:
    VITE_SUPABASE_URL=https://your-project.supabase.co
    VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
    ```
-3. Create tables matching the fallback schema in `src/lib/content.ts`
+3. Run the migrations in `supabase/migrations/` against your project.
 
 ### Required tables
-- `services` — title, description, icon, sort_order
-- `projects` — title, category, description, image_url, tech[], live_url, github_url, sort_order
-- `tech_stack` — name, category, sort_order
-- `clients` — name, logo_url, website_url, sort_order
-- `testimonials` — name, role, quote, rating, avatar_url, sort_order
-- `team_members` — name, role, bio, image_url, twitter_url, linkedin_url, github_url, sort_order
-- `pricing_plans` — name, price, description, features[], is_popular, sort_order
-- `blog_posts` — title, slug, summary, content, author, category, image_url, published, created_at
+- `services` — title, description, icon, sort_order, visible
+- `projects` — title, category, description, image_url, tech[], live_url, github_url, sort_order, visible
+- `tech_stack` — name, category, sort_order, visible
+- `clients` — name, logo_url, website_url, sort_order, visible
+- `testimonials` — name, role, quote, rating, avatar_url, sort_order, visible
+- `team_members` — name, role, bio, image_url, twitter_url, linkedin_url, github_url, sort_order, visible
+- `pricing_plans` — name, price, description, features[], is_popular, sort_order, visible
+- `blog_posts` — title, slug, summary, content, author, category, image_url, published, created_at, visible
 - `contact_messages` — name, email, phone, subject, message, created_at, read
+- `site_content` — key, value (for social links & footer text)
+
+### Supabase Storage (for image uploads in admin)
+1. In your Supabase dashboard → **Storage** → Create a bucket named exactly `images`
+2. Set the bucket to **Public**
+3. Add a policy to allow uploads (anon or authenticated, as needed)
+
+Then in the admin at `/admin`, image fields will show an **Upload** button alongside the URL input.
 
 ---
 
@@ -112,26 +123,28 @@ src/
 │   └── ...
 ├── components/
 │   ├── sections/         # All page sections
-│   │   ├── Hero.tsx      # Landing hero
-│   │   ├── Stats.tsx     # Animated metrics
-│   │   ├── Services.tsx  # Service cards
-│   │   ├── Clients.tsx   # Client logos (Simple Icons)
-│   │   ├── Technologies.tsx  # Dual-row marquee
-│   │   ├── WhyUs.tsx     # Differentiators
-│   │   ├── Process.tsx   # 5-step process
-│   │   ├── Projects.tsx  # Portfolio grid
-│   │   ├── Blog.tsx      # Blog preview
+│   │   ├── Hero.tsx
+│   │   ├── Stats.tsx
+│   │   ├── Services.tsx
+│   │   ├── Clients.tsx
+│   │   ├── Technologies.tsx
+│   │   ├── WhyUs.tsx
+│   │   ├── Process.tsx
+│   │   ├── Projects.tsx
+│   │   ├── Blog.tsx
 │   │   ├── Testimonials.tsx
 │   │   ├── Newsletter.tsx
 │   │   └── CTA.tsx
 │   ├── FadeIn.tsx        # Scroll animation wrapper
 │   ├── Navbar.tsx        # Glass nav with More dropdown
-│   ├── Footer.tsx        # Site footer
+│   ├── Footer.tsx        # Dynamic footer with social links
 │   └── SiteLayout.tsx    # Page wrapper
 ├── lib/
 │   ├── content.ts        # All fallback data
 │   ├── useContent.ts     # Supabase hooks with fallback
 │   └── admin.ts          # Admin auth helpers
+├── main.tsx              # React app entry point
+├── router.tsx            # TanStack Router config
 └── styles.css            # Tailwind + custom utilities
 ```
 
@@ -148,69 +161,63 @@ src/
 
 ## Deployment
 
-> **Why no 404 on refresh here?**
-> This is a TanStack Start **SSR** app — every page request (including refreshes and deep links) hits the server, which handles routing. The 404-on-refresh problem only happens with pure client-side SPAs on static hosts. Since this app runs a real server, that problem doesn't exist.
+This is a **pure static SPA** (no server required). The built output is a `dist/` folder with an `index.html` and assets. All routing is handled client-side by TanStack Router.
+
+> **Important for deep links & page refreshes:** Static hosts must redirect all paths to `/index.html` (returning HTTP 200) so TanStack Router can handle routing. Configure this rewrite rule on whichever host you use.
 
 ---
 
-### Deploy on Render (Recommended — easiest, works out of the box)
-
-> **What caused the blank white screen?** The original start command used `bun --env-file=.env` which fails on Render because there is no `.env` file — Render injects env vars directly. This is now fixed; the start command is just `bun dist/server/server.js`.
+### Deploy on Render (Recommended)
 
 1. Push your code to GitHub / GitLab.
-2. Go to [render.com](https://render.com) → **New** → **Web Service**.
+2. Go to [render.com](https://render.com) → **New** → **Static Site**.
 3. Connect your repository.
 4. Fill in the settings:
 
    | Setting | Value |
    |---|---|
-   | **Environment** | `Node` |
    | **Build Command** | `npm install -g bun && bun install && bun run build` |
-   | **Start Command** | `bun dist/server/server.js` |
+   | **Publish Directory** | `dist` |
 
-5. Under **Environment Variables**, add these:
+5. Under **Redirects/Rewrites**, add a rule:
 
-   | Variable | Value | Required |
+   | Source | Destination | Action |
    |---|---|---|
-   | `PORT` | `5000` | **Yes** — tells Render which port your server listens on |
-   | `VITE_SUPABASE_URL` | `https://your-project.supabase.co` | No (optional CMS) |
-   | `VITE_SUPABASE_PUBLISHABLE_KEY` | `your-anon-key` | No (optional CMS) |
+   | `/*` | `/index.html` | **Rewrite** (200) |
 
-6. Click **Create Web Service**. Render will build and deploy automatically.
+6. Under **Environment Variables**, add these if using Supabase:
 
-That's it. Refreshes, deep links, and all routes work correctly because Render runs the SSR server.
+   | Variable | Value |
+   |---|---|
+   | `VITE_SUPABASE_URL` | `https://your-project.supabase.co` |
+   | `VITE_SUPABASE_PUBLISHABLE_KEY` | `your-anon-key` |
 
-#### Supabase Storage (for image uploads in admin)
-1. In your Supabase dashboard → **Storage** → Create a new bucket named exactly `images`
-2. Set the bucket to **Public**
-3. Go to **Policies** and allow authenticated or anon uploads as needed
-
-Then in the admin at `/admin`, image fields will show an **Upload** button alongside the URL input.
+7. Click **Create Static Site**. Render will build and deploy automatically.
 
 ---
 
-### Deploy on Vercel (Requires extra setup)
+### Deploy on Vercel
 
-> **Important:** Vercel does NOT work out of the box with this project. TanStack Start needs a Vercel-specific adapter to convert the SSR output into Vercel serverless functions. The current build targets a Bun/Node server, not Vercel's format.
->
-> If you want Vercel, **Render is a much simpler choice** for TanStack Start apps.
+Vercel auto-detects Vite. Just push to GitHub and import the repo on Vercel.
 
-If you still want Vercel, here's what you'd need to do:
+Add a `vercel.json` for SPA routing (deep links):
+```json
+{
+  "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
+}
+```
 
-1. Install the Vercel adapter:
-   ```bash
-   bun add @tanstack/react-start-adapter-vercel
+---
+
+### Deploy on Cloudflare Pages
+
+1. Connect your repo in the Cloudflare Pages dashboard.
+2. Build command: `bun install && bun run build`
+3. Output directory: `dist`
+4. Add a `_redirects` file inside the `public/` folder:
    ```
-2. Update `vite.config.ts` to use the Vercel adapter instead of the default one.
-3. Add a `vercel.json` with rewrites so all paths route through the server function:
-   ```json
-   {
-     "rewrites": [{ "source": "/(.*)", "destination": "/api/server" }]
-   }
+   /* /index.html 200
    ```
-4. Follow the [TanStack Start Vercel adapter docs](https://tanstack.com/router/latest/docs/framework/react/start/hosting) for the exact configuration.
-
-This is significantly more work. **Render is the recommended path.**
 
 ---
 

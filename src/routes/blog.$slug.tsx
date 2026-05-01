@@ -6,9 +6,6 @@ import { FadeIn } from "@/components/FadeIn";
 import { useBlogPost } from "@/lib/useContent";
 
 export const Route = createFileRoute("/blog/$slug")({
-  head: () => ({
-    meta: [{ title: "Blog Post — Synapex Developers" }],
-  }),
   component: BlogPostPage,
 });
 

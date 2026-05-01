@@ -8,14 +8,6 @@ import { useSiteContent } from "@/lib/useContent";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/contact")({
-  head: () => ({
-    meta: [
-      { title: "Contact — Synapex Developers" },
-      { name: "description", content: "Tell us about your project. We reply within 24 hours." },
-      { property: "og:title", content: "Contact Synapex" },
-      { property: "og:description", content: "Start a project with Synapex Developers." },
-    ],
-  }),
   component: ContactPage,
 });
 

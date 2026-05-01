@@ -7,14 +7,6 @@ import { SectionHeader } from "@/components/sections/Services";
 import { usePricing } from "@/lib/useContent";
 
 export const Route = createFileRoute("/pricing")({
-  head: () => ({
-    meta: [
-      { title: "Pricing — Synapex Developers" },
-      { name: "description", content: "Transparent pricing for websites, apps, AI and custom software." },
-      { property: "og:title", content: "Synapex Pricing" },
-      { property: "og:description", content: "Plans that fit startups, businesses and enterprises." },
-    ],
-  }),
   component: PricingPage,
 });
 

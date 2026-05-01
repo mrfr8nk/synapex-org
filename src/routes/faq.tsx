@@ -9,12 +9,6 @@ import { CTA } from "@/components/sections/CTA";
 import { fallbackFaq } from "@/lib/content";
 
 export const Route = createFileRoute("/faq")({
-  head: () => ({
-    meta: [
-      { title: "FAQ — Synapex Developers" },
-      { name: "description", content: "Common questions about working with Synapex — pricing, timelines, ownership and more." },
-    ],
-  }),
   component: FaqPage,
 });
 
