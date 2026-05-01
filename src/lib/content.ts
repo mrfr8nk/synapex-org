@@ -57,17 +57,17 @@ export const fallbackTestimonials = [
 ];
 
 export const fallbackTeam = [
-  { id: "tm1", name: "Frank M.", role: "Founder & Lead Engineer", bio: "Full-stack engineer obsessed with clean architecture.", image_url: null, twitter_url: null, linkedin_url: null, github_url: null },
-  { id: "tm2", name: "Tendai R.", role: "Product Designer", bio: "Designs interfaces that feel inevitable.", image_url: null, twitter_url: null, linkedin_url: null, github_url: null },
+  { id: "tm1", name: "Darrell M.", role: "Founder & Lead Engineer", bio: "Full-stack engineer obsessed with clean architecture.", image_url: null, twitter_url: null, linkedin_url: null, github_url: null },
+  { id: "tm2", name: "Crejinai M.", role: "Product Designer", bio: "Designs interfaces that feel inevitable.", image_url: null, twitter_url: null, linkedin_url: null, github_url: null },
   { id: "tm3", name: "Kuda L.", role: "Mobile Engineer", bio: "Native iOS & Android specialist.", image_url: null, twitter_url: null, linkedin_url: null, github_url: null },
   { id: "tm4", name: "Nyasha P.", role: "AI Engineer", bio: "Building intelligent systems with LLMs.", image_url: null, twitter_url: null, linkedin_url: null, github_url: null },
 ];
 
 export const fallbackPricing = [
-  { id: "pr1", name: "Starter", price: "$499", description: "For founders launching their first MVP.",
-    features: ["Landing page or 1-page app", "Mobile responsive", "Basic SEO", "1 round of revisions", "2-week delivery"],
+  { id: "pr1", name: "Starter", price: "$100", description: "For founders  first MVP.",
+    features: ["Landing page or 3-page app", "Mobile responsive", "Basic SEO", "1 round of revisions", "1-week delivery"],
     is_popular: false },
-  { id: "pr2", name: "Professional", price: "$2,499", description: "For growing businesses ready to scale.",
+  { id: "pr2", name: "Professional", price: "$250", description: "For growing businesses ready to scale.",
     features: ["Multi-page web or mobile app", "Custom design system", "Auth + Database", "AI integration ready", "3 rounds of revisions", "60 days support"],
     is_popular: true },
   { id: "pr3", name: "Enterprise", price: "Let's talk", description: "For ambitious platforms & SaaS products.",
@@ -76,7 +76,7 @@ export const fallbackPricing = [
 ];
 
 export const fallbackContent: Record<string, any> = {
-  hero_eyebrow: "African innovation, global standards",
+  hero_eyebrow: "Innovation, global standards",
   hero_title: "We engineer the future of software",
   hero_subtitle: "Synapex Developers builds premium websites, mobile apps, AI systems and platforms for ambitious teams worldwide.",
   hero_cta_primary: "Start a project",
@@ -88,8 +88,8 @@ export const fallbackContent: Record<string, any> = {
     { value: "12", label: "Engineers" },
   ],
   about_title: "Young engineers. World-class craft.",
-  about_body: "Synapex Developers is a software studio born in Africa with a global mindset. We build premium digital products for ambitious teams who refuse to settle for mediocre software.",
-  contact_email: "hello@synapex.dev",
-  contact_whatsapp: "+263 78 000 0000",
+  about_body: "Synapex Developers is a software studio born in Zimbabwe with a global mindset. We build premium digital products for ambitious teams who refuse to settle for mediocre software.",
+  contact_email: "contact@synapex.co.zw",
+  contact_whatsapp: "+263 719 647 303",
   contact_location: "Harare, Zimbabwe — serving worldwide",
 };
