@@ -1,7 +1,9 @@
 // Hardcoded admin auth — per user request.
-// NOTE: This is client-side only and visible in the bundle. Anyone can see these.
+// NOTE: This is client-side only and visible in the bundle.
+
+// I was testing with this so play along
 const ADMIN_USER = "mrfrankofc";
-const ADMIN_PASS = "darex123";
+const ADMIN_PASS = "darex";
 const KEY = "synapex_admin_session";
 
 export function adminLogin(username: string, password: string): boolean {
