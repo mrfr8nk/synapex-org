@@ -1,7 +1,37 @@
-import { motion } from "framer-motion";
+import { motion, useInView, useMotionValue, useSpring, animate } from "framer-motion";
 import { ArrowRight, Play } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useSiteContent } from "@/lib/useContent";
+import { useEffect, useRef } from "react";
+
+function AnimatedNumber({ value }: { value: string }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+
+  const numericMatch = value.match(/(\d+)/);
+  const numeric = numericMatch ? parseInt(numericMatch[1]) : null;
+  const prefix = numeric !== null ? value.slice(0, numericMatch!.index) : "";
+  const suffix = numeric !== null ? value.slice((numericMatch!.index ?? 0) + numericMatch![1].length) : "";
+
+  useEffect(() => {
+    if (!inView || numeric === null || !ref.current) return;
+    const node = ref.current;
+    const ctrl = animate(0, numeric, {
+      duration: 2,
+      ease: [0.16, 1, 0.3, 1],
+      onUpdate: (v) => {
+        node.textContent = prefix + Math.round(v).toString() + suffix;
+      },
+    });
+    return () => ctrl.stop();
+  }, [inView, numeric, prefix, suffix]);
+
+  return (
+    <span ref={ref}>
+      {numeric !== null ? prefix + "0" + suffix : value}
+    </span>
+  );
+}
 
 export function Hero() {
   const c = useSiteContent();
@@ -9,12 +39,10 @@ export function Hero() {
 
   return (
     <section className="relative min-h-[100vh] flex items-center overflow-hidden">
-      {/* Layered backgrounds */}
       <div className="absolute inset-0 stars" />
       <div className="absolute inset-0 grid-bg" />
       <div className="absolute inset-0 spotlight" />
 
-      {/* Floating ambient orbs (white only — Starlink) */}
       <div className="absolute top-1/3 left-1/4 h-96 w-96 rounded-full bg-white/[0.03] blur-3xl animate-float" />
       <div className="absolute bottom-1/4 right-1/4 h-[500px] w-[500px] rounded-full bg-white/[0.02] blur-3xl animate-float [animation-delay:2s]" />
 
@@ -71,7 +99,6 @@ export function Hero() {
           </Link>
         </motion.div>
 
-        {/* Stats — minimal Starlink-style */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -81,7 +108,7 @@ export function Hero() {
           {stats.map((s: any, i: number) => (
             <div key={i} className="bg-black/40 backdrop-blur-xl p-6 text-center">
               <div className="text-3xl md:text-4xl font-semibold tracking-tight text-fade">
-                {s.value}
+                <AnimatedNumber value={s.value} />
               </div>
               <div className="mt-1 text-[11px] uppercase tracking-[0.15em] text-white/40">
                 {s.label}
@@ -91,14 +118,18 @@ export function Hero() {
         </motion.div>
       </div>
 
-      {/* Scroll hint */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[10px] uppercase tracking-[0.3em] text-white/30"
+        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 text-[10px] uppercase tracking-[0.3em] text-white/30"
       >
-        Scroll
+        <span>Scroll</span>
+        <motion.div
+          animate={{ y: [0, 6, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          className="w-px h-6 bg-gradient-to-b from-white/30 to-transparent"
+        />
       </motion.div>
     </section>
   );

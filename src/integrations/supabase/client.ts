@@ -2,20 +2,33 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
+function createNullClient(): ReturnType<typeof createClient<Database>> {
+  const noop = () => noop as any;
+  const chain: any = new Proxy({}, {
+    get: (_, prop) => {
+      if (prop === 'then') return undefined;
+      if (prop === 'eq' || prop === 'order' || prop === 'select' || prop === 'insert'
+        || prop === 'update' || prop === 'delete' || prop === 'limit' || prop === 'single') {
+        return () => chain;
+      }
+      if (prop === Symbol.toPrimitive) return undefined;
+      return () => Promise.resolve({ data: null, error: { message: 'Supabase not configured' } });
+    }
+  });
+  return {
+    from: (_: string) => chain,
+    auth: { getSession: () => Promise.resolve({ data: { session: null }, error: null }) },
+    channel: () => ({ subscribe: () => {}, unsubscribe: noop }),
+  } as any;
+}
+
 function createSupabaseClient() {
-  // Use import.meta.env for client-side (Vite build-time replacement)
-  // Fall back to process.env for SSR (server-side rendering)
-  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL;
-  const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || process.env.SUPABASE_PUBLISHABLE_KEY;
+  const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || (typeof process !== 'undefined' ? process.env.SUPABASE_URL : undefined);
+  const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || (typeof process !== 'undefined' ? process.env.SUPABASE_PUBLISHABLE_KEY : undefined);
 
   if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
-    const missing = [
-      ...(!SUPABASE_URL ? ['SUPABASE_URL'] : []),
-      ...(!SUPABASE_PUBLISHABLE_KEY ? ['SUPABASE_PUBLISHABLE_KEY'] : []),
-    ];
-    const message = `Missing Supabase environment variable(s): ${missing.join(', ')}. Connect Supabase in Lovable Cloud.`;
-    console.error(`[Supabase] ${message}`);
-    throw new Error(message);
+    console.warn('[Supabase] Environment variables not set — running with fallback content only.');
+    return createNullClient();
   }
 
   return createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -29,12 +42,9 @@ function createSupabaseClient() {
 
 let _supabase: ReturnType<typeof createSupabaseClient> | undefined;
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
 export const supabase = new Proxy({} as ReturnType<typeof createSupabaseClient>, {
   get(_, prop, receiver) {
     if (!_supabase) _supabase = createSupabaseClient();
-    return Reflect.get(_supabase, prop, receiver);
+    return Reflect.get(_supabase as object, prop, receiver);
   },
 });
-

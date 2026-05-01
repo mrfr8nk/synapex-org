@@ -38,9 +38,7 @@ export function Footer() {
         <div className="grid gap-12 lg:grid-cols-5">
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center">
-                <span className="text-black text-xs font-bold">SX</span>
-              </div>
+              <img src="/synapex-logo.png" alt="Synapex" className="h-9 w-9 object-contain" />
               <span className="font-semibold tracking-tight">SYNAPEX DEVELOPERS</span>
             </Link>
             <p className="mt-5 text-sm text-white/50 max-w-sm leading-relaxed">

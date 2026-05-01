@@ -37,16 +37,14 @@ export function Navbar() {
       }`}
     >
       <div className="px-4">
-        <nav
-          className={`mx-auto max-w-7xl rounded-full transition-all duration-500 ${
-            scrolled ? "glass-nav" : "bg-transparent"
-          }`}
-        >
+        <nav className="mx-auto max-w-7xl rounded-full transition-all duration-500 glass-nav">
           <div className="flex items-center justify-between px-5 py-2.5">
             <Link to="/" className="flex items-center gap-2 group">
-              <div className="h-7 w-7 rounded-full bg-white flex items-center justify-center">
-                <span className="text-black text-[10px] font-bold tracking-tighter">SX</span>
-              </div>
+              <img
+                src="/synapex-logo.png"
+                alt="Synapex"
+                className="h-8 w-8 object-contain"
+              />
               <span className="font-semibold text-sm tracking-tight">SYNAPEX</span>
             </Link>
 
