@@ -16,7 +16,7 @@ Premium marketing and portfolio website for **Synapex Developers**, a software e
 | Runtime | [Bun](https://bun.sh) |
 | Build | [Vite](https://vitejs.dev) 7 |
 | CMS / Database | [Supabase](https://supabase.com) (optional — graceful fallback) |
-| Deployment | Replit Autoscale |
+| Deployment | Render (recommended), Replit |
 
 ---
 
@@ -148,7 +148,70 @@ src/
 
 ## Deployment
 
-Deployed via [Render](https://render.com). The `dist/` output is served as a static site with SSR entrypoint.
+> **Why no 404 on refresh here?**
+> This is a TanStack Start **SSR** app — every page request (including refreshes and deep links) hits the server, which handles routing. The 404-on-refresh problem only happens with pure client-side SPAs on static hosts. Since this app runs a real server, that problem doesn't exist.
+
+---
+
+### Deploy on Render (Recommended — easiest, works out of the box)
+
+1. Push your code to GitHub / GitLab.
+2. Go to [render.com](https://render.com) → **New** → **Web Service**.
+3. Connect your repository.
+4. Fill in the settings:
+
+   | Setting | Value |
+   |---|---|
+   | **Environment** | `Node` |
+   | **Build Command** | `npm install -g bun && bun install && bun run build` |
+   | **Start Command** | `bun dist/server/server.js` |
+
+5. Under **Environment Variables**, add any you need (e.g. Supabase keys — optional):
+   ```
+   VITE_SUPABASE_URL=https://your-project.supabase.co
+   VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+   ```
+6. Click **Create Web Service**. Render will build and deploy automatically.
+
+That's it. Refreshes, deep links, and all routes work correctly because Render runs the SSR server.
+
+---
+
+### Deploy on Vercel (Requires extra setup)
+
+> **Important:** Vercel does NOT work out of the box with this project. TanStack Start needs a Vercel-specific adapter to convert the SSR output into Vercel serverless functions. The current build targets a Bun/Node server, not Vercel's format.
+>
+> If you want Vercel, **Render is a much simpler choice** for TanStack Start apps.
+
+If you still want Vercel, here's what you'd need to do:
+
+1. Install the Vercel adapter:
+   ```bash
+   bun add @tanstack/react-start-adapter-vercel
+   ```
+2. Update `vite.config.ts` to use the Vercel adapter instead of the default one.
+3. Add a `vercel.json` with rewrites so all paths route through the server function:
+   ```json
+   {
+     "rewrites": [{ "source": "/(.*)", "destination": "/api/server" }]
+   }
+   ```
+4. Follow the [TanStack Start Vercel adapter docs](https://tanstack.com/router/latest/docs/framework/react/start/hosting) for the exact configuration.
+
+This is significantly more work. **Render is the recommended path.**
+
+---
+
+### Environment Variables Reference
+
+| Variable | Required | Description |
+|---|---|---|
+| `VITE_SUPABASE_URL` | No | Your Supabase project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | No | Your Supabase anon/public key |
+
+Without Supabase vars, the site renders using built-in fallback content — no errors, no blank pages.
+
+---
 
 Production URL: [synapex.co.zw](https://synapex.co.zw)
 
