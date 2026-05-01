@@ -4,12 +4,13 @@ import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/sections/Services";
 import { Target, Eye, Heart, Zap } from "lucide-react";
 import { CTA } from "@/components/sections/CTA";
+import { useSiteContent } from "@/lib/useContent";
 
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
       { title: "About — Synapex Developers" },
-      { name: "description", content: "Young developers from Africa building world-class software with global mindset and craftsmanship." },
+      { name: "description", content: "Young developers from Africa building world-class software with global craftsmanship." },
       { property: "og:title", content: "About Synapex Developers" },
       { property: "og:description", content: "Our story, mission and values." },
     ],
@@ -18,10 +19,10 @@ export const Route = createFileRoute("/about")({
 });
 
 const values = [
-  { icon: Target, title: "Mission", desc: "Empower businesses and creators with intelligent, beautiful software." },
+  { icon: Target, title: "Mission", desc: "Empower businesses with intelligent, beautiful software." },
   { icon: Eye, title: "Vision", desc: "Become Africa's leading export of world-class digital products." },
-  { icon: Heart, title: "Values", desc: "Craft, honesty, curiosity, and relentless customer obsession." },
-  { icon: Zap, title: "Energy", desc: "Young, fast, ambitious — we treat every project like our own startup." },
+  { icon: Heart, title: "Values", desc: "Craft, honesty, curiosity, and customer obsession." },
+  { icon: Zap, title: "Energy", desc: "Young, fast, ambitious — every project treated like our own." },
 ];
 
 const timeline = [
@@ -32,47 +33,67 @@ const timeline = [
 ];
 
 function AboutPage() {
+  const c = useSiteContent();
   return (
     <SiteLayout>
-      <section className="relative py-24 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-radial-glow" />
-        <div className="absolute inset-0 bg-grid" />
+      <section className="relative pt-32 pb-24 px-6 overflow-hidden">
+        <div className="absolute inset-0 stars" />
+        <div className="absolute inset-0 grid-bg" />
+        <div className="absolute inset-0 spotlight" />
         <div className="relative max-w-5xl mx-auto text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 rounded-full glass px-3.5 py-1 text-[11px] uppercase tracking-[0.2em] text-white/60 mb-6"
+          >
+            <span className="h-1.5 w-1.5 rounded-full bg-white animate-glow-pulse" /> About us
+          </motion.div>
           <motion.h1
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="text-5xl md:text-7xl font-semibold tracking-[-0.04em] leading-[0.95] text-fade"
+          >
+            {c.about_title}
+          </motion.h1>
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-5xl md:text-7xl font-bold tracking-tighter"
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="mt-8 text-lg text-white/60 max-w-2xl mx-auto leading-relaxed"
           >
-            Young developers. <br />
-            <span className="text-gradient">World-class craft.</span>
-          </motion.h1>
-          <p className="mt-8 text-lg text-muted-foreground max-w-2xl mx-auto">
-            Synapex Developers is a software studio born in Africa with a global mindset. We build
-            premium digital products for ambitious teams who refuse to settle for mediocre software.
-          </p>
+            {c.about_body}
+          </motion.p>
         </div>
       </section>
 
       <section className="py-20 px-6">
-        <div className="max-w-7xl mx-auto grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {values.map((v) => (
-            <div key={v.title} className="rounded-2xl glass p-6 hover:shadow-glow transition-shadow">
-              <v.icon className="h-7 w-7 text-cyan" />
-              <h3 className="mt-4 text-lg font-semibold">{v.title}</h3>
-              <p className="mt-2 text-sm text-muted-foreground">{v.desc}</p>
-            </div>
+        <div className="max-w-7xl mx-auto grid gap-px overflow-hidden rounded-3xl glass sm:grid-cols-2 lg:grid-cols-4">
+          {values.map((v, i) => (
+            <motion.div
+              key={v.title}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.06 }}
+              className="bg-black/40 backdrop-blur-xl p-8 hover:bg-white/[0.04] transition-colors"
+            >
+              <v.icon className="h-6 w-6" />
+              <h3 className="mt-5 text-lg font-semibold tracking-tight">{v.title}</h3>
+              <p className="mt-2 text-sm text-white/50 leading-relaxed">{v.desc}</p>
+            </motion.div>
           ))}
         </div>
       </section>
 
       <section className="py-24 px-6">
         <SectionHeader
-          tag="Our journey"
-          title={<>From garage to <span className="text-gradient">global</span></>}
-          subtitle="A short story of how we got here — and where we're heading."
+          eyebrow="Our journey"
+          title="From garage to global."
+          subtitle="A short story of how we got here."
         />
-        <div className="mt-16 max-w-3xl mx-auto relative">
-          <div className="absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-primary via-accent to-purple" />
+        <div className="mt-20 max-w-3xl mx-auto relative">
+          <div className="absolute left-4 top-2 bottom-2 w-px bg-gradient-to-b from-white/40 via-white/10 to-transparent" />
           {timeline.map((t, i) => (
             <motion.div
               key={t.year}
@@ -80,14 +101,14 @@ function AboutPage() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="relative pl-14 pb-10"
+              className="relative pl-14 pb-12"
             >
-              <div className="absolute left-0 h-9 w-9 rounded-full bg-gradient-to-br from-primary to-purple flex items-center justify-center text-xs font-bold shadow-glow">
-                {i + 1}
+              <div className="absolute left-0 h-9 w-9 rounded-full glass-strong flex items-center justify-center text-xs font-semibold">
+                0{i + 1}
               </div>
-              <div className="text-xs text-cyan font-mono">{t.year}</div>
-              <h3 className="mt-1 text-xl font-semibold">{t.title}</h3>
-              <p className="mt-2 text-muted-foreground">{t.desc}</p>
+              <div className="text-[11px] uppercase tracking-[0.25em] text-white/40 font-mono">{t.year}</div>
+              <h3 className="mt-1 text-xl font-semibold tracking-tight">{t.title}</h3>
+              <p className="mt-2 text-white/50">{t.desc}</p>
             </motion.div>
           ))}
         </div>
