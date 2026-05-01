@@ -1,9 +1,16 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { SiteLayout } from "@/components/SiteLayout";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { adminLogin, adminLogout, isAdmin } from "@/lib/admin";
 import { supabase } from "@/integrations/supabase/client";
-import { LogOut, Plus, Trash2, Save, RefreshCw, CheckCircle, AlertCircle } from "lucide-react";
+import { saveSiteContentKey, useSiteContent } from "@/lib/useContent";
+import { fallbackContent } from "@/lib/content";
+import {
+  LogOut, Plus, Trash2, Save, RefreshCw, CheckCircle, AlertCircle,
+  LayoutDashboard, FileText, Users, Star, DollarSign, Briefcase,
+  MessageSquare, Settings, Eye, EyeOff, Upload, Link2, Mail,
+  ExternalLink, ChevronRight, Layers, BookOpen, Code2, Globe,
+  Image as ImageIcon, X, Check, Inbox, Send,
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/admin")({
@@ -11,35 +18,74 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-const TABLES = [
-  { key: "services", label: "Services", fields: ["title", "description", "icon", "sort_order"], orderBy: "sort_order" },
-  { key: "projects", label: "Projects", fields: ["title", "category", "description", "image_url", "tech", "live_url", "github_url", "sort_order"], orderBy: "sort_order" },
-  { key: "tech_stack", label: "Tech Stack", fields: ["name", "category", "sort_order"], orderBy: "sort_order" },
-  { key: "clients", label: "Clients", fields: ["name", "logo_url", "website_url", "sort_order"], orderBy: "sort_order" },
-  { key: "testimonials", label: "Testimonials", fields: ["name", "role", "quote", "rating", "avatar_url", "sort_order"], orderBy: "sort_order" },
-  { key: "team_members", label: "Team", fields: ["name", "role", "bio", "image_url", "twitter_url", "linkedin_url", "github_url", "sort_order"], orderBy: "sort_order" },
-  { key: "pricing_plans", label: "Pricing", fields: ["name", "price", "description", "features", "is_popular", "sort_order"], orderBy: "sort_order" },
-  { key: "blog_posts", label: "Blog Posts", fields: ["title", "slug", "summary", "content", "author", "category", "image_url", "published"], orderBy: "created_at" },
-];
-
 type Toast = { id: number; type: "success" | "error"; message: string };
 
-function ToastContainer({ toasts, remove }: { toasts: Toast[]; remove: (id: number) => void }) {
+const NAV_ITEMS = [
+  { key: "overview", label: "Overview", Icon: LayoutDashboard },
+  { key: "services", label: "Services", Icon: Briefcase },
+  { key: "projects", label: "Projects", Icon: Layers },
+  { key: "tech_stack", label: "Tech Stack", Icon: Code2 },
+  { key: "clients", label: "Clients", Icon: Globe },
+  { key: "testimonials", label: "Testimonials", Icon: Star },
+  { key: "team_members", label: "Team", Icon: Users },
+  { key: "pricing_plans", label: "Pricing", Icon: DollarSign },
+  { key: "blog_posts", label: "Blog Posts", Icon: BookOpen },
+  { key: "messages", label: "Messages", Icon: Inbox },
+  { key: "settings", label: "Site Settings", Icon: Settings },
+];
+
+const TABLE_CONFIG: Record<string, { fields: string[]; orderBy: string }> = {
+  services: { fields: ["title", "description", "icon", "sort_order", "visible"], orderBy: "sort_order" },
+  projects: { fields: ["title", "category", "description", "image_url", "tech", "live_url", "github_url", "sort_order", "visible"], orderBy: "sort_order" },
+  tech_stack: { fields: ["name", "category", "sort_order", "visible"], orderBy: "sort_order" },
+  clients: { fields: ["name", "logo_url", "website_url", "sort_order", "visible"], orderBy: "sort_order" },
+  testimonials: { fields: ["name", "role", "quote", "rating", "avatar_url", "sort_order", "visible"], orderBy: "sort_order" },
+  team_members: { fields: ["name", "role", "bio", "image_url", "twitter_url", "linkedin_url", "github_url", "sort_order", "visible"], orderBy: "sort_order" },
+  pricing_plans: { fields: ["name", "price", "description", "features", "is_popular", "sort_order", "visible"], orderBy: "sort_order" },
+  blog_posts: { fields: ["title", "slug", "summary", "content", "author", "category", "image_url", "published", "visible"], orderBy: "created_at" },
+};
+
+const IMAGE_FIELDS = ["image_url", "logo_url", "avatar_url", "photo_url", "cover_url", "thumbnail_url"];
+
+const SETTINGS_FIELDS = [
+  { group: "Social Links", items: [
+    { key: "social_github", label: "GitHub URL", placeholder: "https://github.com/your-org" },
+    { key: "social_twitter", label: "Twitter / X URL", placeholder: "https://twitter.com/your-handle" },
+    { key: "social_linkedin", label: "LinkedIn URL", placeholder: "https://linkedin.com/company/your-org" },
+    { key: "social_instagram", label: "Instagram URL", placeholder: "https://instagram.com/your-handle" },
+    { key: "social_facebook", label: "Facebook URL", placeholder: "https://facebook.com/your-page" },
+    { key: "social_youtube", label: "YouTube URL", placeholder: "https://youtube.com/@your-channel" },
+  ]},
+  { group: "Contact Info", items: [
+    { key: "contact_email", label: "Email Address", placeholder: "hello@company.com" },
+    { key: "contact_whatsapp", label: "WhatsApp / Phone", placeholder: "+1 234 567 8900" },
+    { key: "contact_location", label: "Location", placeholder: "City, Country" },
+  ]},
+  { group: "Footer & Brand", items: [
+    { key: "footer_tagline", label: "Footer Tagline", placeholder: "What you do, for who." },
+    { key: "hero_title", label: "Hero Headline", placeholder: "We build the future." },
+    { key: "hero_subtitle", label: "Hero Subtitle", placeholder: "Short description of your agency." },
+    { key: "about_body", label: "About Paragraph", placeholder: "Tell your story..." },
+  ]},
+];
+
+function Toast({ toasts, remove }: { toasts: Toast[]; remove: (id: number) => void }) {
   return (
-    <div className="fixed top-24 right-4 z-50 space-y-2 pointer-events-none">
+    <div className="fixed top-6 right-6 z-[100] space-y-2 pointer-events-none">
       <AnimatePresence>
         {toasts.map((t) => (
-          <motion.div
-            key={t.id}
-            initial={{ opacity: 0, x: 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 40 }}
-            className={`flex items-center gap-2 rounded-xl px-4 py-3 text-sm font-medium shadow-lg pointer-events-auto cursor-pointer ${
-              t.type === "success" ? "bg-emerald-500/20 border border-emerald-500/30 text-emerald-300" : "bg-red-500/20 border border-red-500/30 text-red-300"
-            }`}
+          <motion.div key={t.id}
+            initial={{ opacity: 0, x: 40, scale: 0.95 }}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={{ opacity: 0, x: 40, scale: 0.95 }}
             onClick={() => remove(t.id)}
+            className={`flex items-center gap-2.5 rounded-2xl px-4 py-3 text-sm font-medium shadow-2xl pointer-events-auto cursor-pointer border ${
+              t.type === "success"
+                ? "bg-emerald-950/90 border-emerald-500/30 text-emerald-300 backdrop-blur-xl"
+                : "bg-red-950/90 border-red-500/30 text-red-300 backdrop-blur-xl"
+            }`}
           >
-            {t.type === "success" ? <CheckCircle className="h-4 w-4 shrink-0" /> : <AlertCircle className="h-4 w-4 shrink-0" />}
+            {t.type === "success" ? <Check className="h-4 w-4 shrink-0" /> : <X className="h-4 w-4 shrink-0" />}
             {t.message}
           </motion.div>
         ))}
@@ -48,17 +94,87 @@ function ToastContainer({ toasts, remove }: { toasts: Toast[]; remove: (id: numb
   );
 }
 
+function ImageField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const ref = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const upload = async (file: File) => {
+    setUploading(true);
+    try {
+      const ext = file.name.split(".").pop();
+      const path = `uploads/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+      const { error } = await supabase.storage.from("images").upload(path, file, { upsert: true });
+      if (error) throw error;
+      const { data } = supabase.storage.from("images").getPublicUrl(path);
+      onChange(data.publicUrl);
+    } catch (e: any) {
+      alert(`Upload failed: ${e?.message || "Unknown error"}. Make sure you have an 'images' bucket in Supabase Storage with public access.`);
+    }
+    setUploading(false);
+  };
+
+  return (
+    <div className="space-y-2">
+      <div className="flex gap-2">
+        <input
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          placeholder="https://... or upload below"
+          className="flex-1 bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors placeholder:text-white/20"
+        />
+        <button
+          type="button"
+          onClick={() => ref.current?.click()}
+          disabled={uploading}
+          className="inline-flex items-center gap-1.5 rounded-xl bg-white/10 border border-white/10 px-3 py-2.5 text-xs hover:bg-white/15 transition-colors disabled:opacity-50 shrink-0"
+        >
+          {uploading ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
+          {uploading ? "Uploading..." : "Upload"}
+        </button>
+        <input ref={ref} type="file" accept="image/*" className="hidden"
+          onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ""; }} />
+      </div>
+      {value && (
+        <div className="flex items-center gap-2">
+          <img src={value} alt="" className="h-12 w-12 rounded-lg object-cover border border-white/10" onError={(e) => { (e.target as any).style.display = "none"; }} />
+          <span className="text-[10px] text-white/30 truncate max-w-[200px]">{value}</span>
+          <button type="button" onClick={() => onChange("")} className="text-white/30 hover:text-white/60 transition-colors ml-auto"><X className="h-3.5 w-3.5" /></button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function StatCard({ label, value, Icon }: { label: string; value: number | string; Icon: any }) {
+  return (
+    <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5 flex items-center gap-4">
+      <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+        <Icon className="h-5 w-5 text-white/50" />
+      </div>
+      <div>
+        <div className="text-2xl font-semibold tracking-tight">{value}</div>
+        <div className="text-xs text-white/40 mt-0.5">{label}</div>
+      </div>
+    </div>
+  );
+}
+
 function AdminPage() {
   const nav = useNavigate();
   const [logged, setLogged] = useState(false);
   const [u, setU] = useState(""); const [p, setP] = useState(""); const [err, setErr] = useState("");
-  const [tab, setTab] = useState("services");
+  const [tab, setTab] = useState("overview");
   const [rows, setRows] = useState<any[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
+  const [stats, setStats] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState<string | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [supabaseOk, setSupabaseOk] = useState<boolean | null>(null);
+  const [mobileNav, setMobileNav] = useState(false);
+  const siteContent = useSiteContent();
+  const [settingsValues, setSettingsValues] = useState<Record<string, string>>({});
+  const [settingsSaving, setSettingsSaving] = useState(false);
 
   const addToast = (type: "success" | "error", message: string) => {
     const id = Date.now();
@@ -71,28 +187,54 @@ function AdminPage() {
     checkSupabase();
   }, []);
 
+  useEffect(() => {
+    const init: Record<string, string> = {};
+    SETTINGS_FIELDS.forEach(({ items }) => items.forEach(({ key }) => {
+      init[key] = String(siteContent[key] ?? fallbackContent[key] ?? "");
+    }));
+    setSettingsValues(init);
+  }, [siteContent]);
+
   async function checkSupabase() {
     try {
       const { error } = await supabase.from("services" as any).select("id").limit(1);
-      setSupabaseOk(!error || error.message !== 'Supabase not configured');
+      setSupabaseOk(!error || error.message !== "Supabase not configured");
     } catch {
       setSupabaseOk(false);
     }
   }
 
-  useEffect(() => { if (logged) loadTab(tab); }, [logged, tab]);
+  async function loadStats() {
+    const tables = Object.keys(TABLE_CONFIG);
+    const counts: Record<string, number> = {};
+    await Promise.all(tables.map(async (t) => {
+      try {
+        const { count } = await supabase.from(t as any).select("id", { count: "exact", head: true });
+        counts[t] = count ?? 0;
+      } catch { counts[t] = 0; }
+    }));
+    setStats(counts);
+  }
+
   useEffect(() => {
     if (!logged) return;
-    supabase.from("contact_messages" as any).select("*").order("created_at", { ascending: false }).then(({ data }) => setMessages(data || []));
+    loadStats();
+    supabase.from("contact_messages" as any).select("*").order("created_at", { ascending: false })
+      .then(({ data }) => setMessages(data || []));
   }, [logged]);
 
+  useEffect(() => {
+    if (!logged || !(tab in TABLE_CONFIG)) return;
+    loadTab(tab);
+  }, [logged, tab]);
+
   async function loadTab(t: string) {
+    if (!(t in TABLE_CONFIG)) return;
     setLoading(true);
     try {
-      const tableConfig = TABLES.find((x) => x.key === t);
-      const orderBy = tableConfig?.orderBy || "sort_order";
-      const ascending = orderBy !== "created_at";
-      const { data, error } = await supabase.from(t as any).select("*").order(orderBy, { ascending });
+      const cfg = TABLE_CONFIG[t];
+      const asc = cfg.orderBy !== "created_at";
+      const { data, error } = await supabase.from(t as any).select("*").order(cfg.orderBy, { ascending: asc });
       if (error) addToast("error", `Load failed: ${error.message}`);
       else setRows(data || []);
     } catch (e: any) {
@@ -109,7 +251,7 @@ function AdminPage() {
       if (rest.features && typeof rest.features === "string") rest.features = rest.features.split("\n").map((s: string) => s.trim()).filter(Boolean);
       const { error } = await supabase.from(tab as any).update(rest).eq("id", id);
       if (error) addToast("error", `Save failed: ${error.message}`);
-      else { addToast("success", "Saved!"); await loadTab(tab); }
+      else { addToast("success", "Saved successfully"); await loadTab(tab); }
     } catch (e: any) {
       addToast("error", e?.message || "Save failed");
     }
@@ -119,16 +261,16 @@ function AdminPage() {
   async function add() {
     setLoading(true);
     try {
-      const tableConfig = TABLES.find((t) => t.key === tab)!;
-      const blank: any = tableConfig.orderBy === "sort_order" ? { sort_order: rows.length } : {};
-      tableConfig.fields.forEach((f) => {
-        if (!(f in blank)) blank[f] = f === "tech" || f === "features" ? [] : f === "is_popular" || f === "published" ? false : f === "rating" ? 5 : "";
+      const cfg = TABLE_CONFIG[tab];
+      const blank: any = cfg.orderBy === "sort_order" ? { sort_order: rows.length, visible: true } : { visible: true };
+      cfg.fields.forEach((f) => {
+        if (!(f in blank)) blank[f] = f === "tech" || f === "features" ? [] : ["is_popular", "published", "visible"].includes(f) ? (f === "visible" ? true : false) : f === "rating" ? 5 : "";
       });
       if (tab === "services") blank.icon = "Code2";
       if (tab === "blog_posts") { blank.slug = `post-${Date.now()}`; blank.published = false; blank.author = "Synapex Team"; }
       const { error } = await supabase.from(tab as any).insert(blank);
       if (error) addToast("error", `Add failed: ${error.message}`);
-      else { addToast("success", "Added new row"); await loadTab(tab); }
+      else { addToast("success", "Added new item"); await loadTab(tab); await loadStats(); }
     } catch (e: any) {
       addToast("error", e?.message || "Add failed");
     }
@@ -136,238 +278,432 @@ function AdminPage() {
   }
 
   async function del(id: string) {
+    if (!confirm("Delete this item?")) return;
     try {
       const { error } = await supabase.from(tab as any).delete().eq("id", id);
       if (error) addToast("error", `Delete failed: ${error.message}`);
-      else { addToast("success", "Deleted"); await loadTab(tab); }
+      else { addToast("success", "Deleted"); await loadTab(tab); await loadStats(); }
     } catch (e: any) {
       addToast("error", e?.message || "Delete failed");
     }
   }
 
+  async function markRead(id: string) {
+    await supabase.from("contact_messages" as any).update({ read: true }).eq("id", id);
+    setMessages((prev) => prev.map((m) => m.id === id ? { ...m, read: true } : m));
+  }
+
+  async function deleteMessage(id: string) {
+    if (!confirm("Delete this message?")) return;
+    await supabase.from("contact_messages" as any).delete().eq("id", id);
+    setMessages((prev) => prev.filter((m) => m.id !== id));
+  }
+
+  async function saveSettings() {
+    setSettingsSaving(true);
+    let ok = true;
+    for (const [key, value] of Object.entries(settingsValues)) {
+      const success = await saveSiteContentKey(key, value);
+      if (!success) ok = false;
+    }
+    setSettingsSaving(false);
+    if (ok) addToast("success", "Settings saved — reload to see changes");
+    else addToast("error", "Some settings failed to save");
+  }
+
   if (!logged) {
     return (
-      <SiteLayout>
-        <section className="min-h-[80vh] flex items-center justify-center px-6 relative">
-          <div className="absolute inset-0 stars" /><div className="absolute inset-0 spotlight" />
-          <motion.form
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-            onSubmit={(e) => { e.preventDefault(); if (adminLogin(u, p)) { setLogged(true); setErr(""); } else setErr("Invalid credentials"); }}
-            className="relative w-full max-w-sm rounded-3xl glass-strong p-8 space-y-5"
-          >
-            <div className="flex items-center gap-3 mb-2">
-              <img src="/synapex-logo.png" alt="Synapex" className="h-8 w-8 object-contain" />
-              <div>
-                <h1 className="text-xl font-semibold tracking-tight">Admin sign in</h1>
-                <p className="text-[11px] text-white/40">Synapex CMS</p>
-              </div>
-            </div>
+      <div className="min-h-screen bg-black flex items-center justify-center px-6 relative">
+        <div className="absolute inset-0 stars" />
+        <div className="absolute inset-0 spotlight" />
+        <motion.form
+          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          onSubmit={(e) => { e.preventDefault(); if (adminLogin(u, p)) { setLogged(true); setErr(""); } else setErr("Invalid credentials"); }}
+          className="relative w-full max-w-sm rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-8 space-y-5"
+        >
+          <div className="flex items-center gap-3 mb-2">
+            <img src="/synapex-logo.png" alt="Synapex" className="h-9 w-9 object-contain" />
             <div>
-              <label className="text-[11px] uppercase tracking-[0.2em] text-white/40">Username</label>
-              <input value={u} onChange={(e) => setU(e.target.value)} autoFocus
-                className="w-full bg-transparent border-b border-white/15 py-3 outline-none focus:border-white transition-colors" />
+              <h1 className="text-xl font-semibold tracking-tight">Admin sign in</h1>
+              <p className="text-[11px] text-white/40">Synapex CMS</p>
             </div>
-            <div>
-              <label className="text-[11px] uppercase tracking-[0.2em] text-white/40">Password</label>
-              <input type="password" value={p} onChange={(e) => setP(e.target.value)}
-                className="w-full bg-transparent border-b border-white/15 py-3 outline-none focus:border-white transition-colors" />
-            </div>
-            {err && <p className="text-xs text-red-400">{err}</p>}
-            <button type="submit" className="w-full rounded-full bg-white text-black py-3 text-sm font-medium hover:bg-white/90 transition-colors">
-              Sign in
-            </button>
-            <Link to="/" className="block text-center text-xs text-white/40 hover:text-white/70 transition-colors">← Back to site</Link>
-          </motion.form>
-        </section>
-      </SiteLayout>
+          </div>
+          <div className="space-y-1">
+            <label className="text-[11px] uppercase tracking-[0.2em] text-white/40">Username</label>
+            <input value={u} onChange={(e) => setU(e.target.value)} autoFocus
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-3 outline-none focus:border-white/40 transition-colors text-sm" />
+          </div>
+          <div className="space-y-1">
+            <label className="text-[11px] uppercase tracking-[0.2em] text-white/40">Password</label>
+            <input type="password" value={p} onChange={(e) => setP(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-3 outline-none focus:border-white/40 transition-colors text-sm" />
+          </div>
+          {err && <p className="text-xs text-red-400">{err}</p>}
+          <button type="submit" className="w-full rounded-full bg-white text-black py-3 text-sm font-medium hover:bg-white/90 transition-colors">
+            Sign in
+          </button>
+          <Link to="/" className="block text-center text-xs text-white/40 hover:text-white/70 transition-colors">← Back to site</Link>
+        </motion.form>
+      </div>
     );
   }
 
-  const fields = TABLES.find((t) => t.key === tab)?.fields || [];
+  const unreadCount = messages.filter((m) => !m.read).length;
+  const fields = TABLE_CONFIG[tab]?.fields || [];
+  const navLabel = NAV_ITEMS.find((n) => n.key === tab)?.label || tab;
 
   return (
-    <SiteLayout>
-      <ToastContainer toasts={toasts} remove={(id) => setToasts((t) => t.filter((x) => x.id !== id))} />
-      <section className="pt-32 pb-24 px-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center gap-3">
-              <img src="/synapex-logo.png" alt="" className="h-8 w-8 object-contain" />
-              <div>
-                <div className="text-[11px] uppercase tracking-[0.25em] text-white/40">Synapex CMS</div>
-                <h1 className="text-2xl font-semibold tracking-tight mt-0.5">Content Manager</h1>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              {supabaseOk === false && (
-                <div className="flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 text-xs text-amber-400">
-                  <AlertCircle className="h-3.5 w-3.5" />
-                  Supabase not connected
-                </div>
-              )}
-              {supabaseOk === true && (
-                <div className="flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 text-xs text-emerald-400">
-                  <CheckCircle className="h-3.5 w-3.5" />
-                  Connected
-                </div>
-              )}
-              <button onClick={() => { adminLogout(); nav({ to: "/" }); }}
-                className="inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-sm hover:bg-white/10 transition-colors">
-                <LogOut className="h-4 w-4" /> Sign out
-              </button>
-            </div>
+    <div className="min-h-screen bg-black flex text-white">
+      <Toast toasts={toasts} remove={(id) => setToasts((t) => t.filter((x) => x.id !== id))} />
+
+      {/* Sidebar */}
+      <aside className={`fixed inset-y-0 left-0 z-50 w-64 flex flex-col border-r border-white/10 bg-black/95 backdrop-blur-xl transition-transform duration-300 lg:translate-x-0 ${mobileNav ? "translate-x-0" : "-translate-x-full"}`}>
+        <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10">
+          <img src="/synapex-logo.png" alt="" className="h-8 w-8 object-contain" />
+          <div>
+            <div className="text-[10px] uppercase tracking-[0.25em] text-white/30">Synapex</div>
+            <div className="text-sm font-semibold">CMS Dashboard</div>
           </div>
+        </div>
 
-          {supabaseOk === false && (
-            <div className="mb-6 rounded-2xl bg-amber-500/5 border border-amber-500/20 p-5">
-              <p className="text-sm text-amber-300 font-medium">Supabase not configured</p>
-              <p className="mt-1 text-sm text-white/50">
-                Add your <code className="text-white/70">VITE_SUPABASE_URL</code> and <code className="text-white/70">VITE_SUPABASE_PUBLISHABLE_KEY</code> environment variables to enable data management. The site currently shows fallback content.
-              </p>
-            </div>
-          )}
-
-          <div className="flex flex-wrap gap-2 mb-6">
-            {TABLES.map((t) => (
-              <button key={t.key} onClick={() => setTab(t.key)}
-                className={`px-4 py-1.5 rounded-full text-xs uppercase tracking-wider transition-all duration-200 ${tab === t.key ? "bg-white text-black scale-105" : "glass hover:bg-white/10"}`}>
-                {t.label}
-              </button>
-            ))}
-            <button onClick={() => setTab("messages")}
-              className={`px-4 py-1.5 rounded-full text-xs uppercase tracking-wider transition-all duration-200 ${tab === "messages" ? "bg-white text-black scale-105" : "glass hover:bg-white/10"}`}>
-              Messages
-              {messages.filter((m) => !m.read).length > 0 && (
-                <span className="ml-1.5 inline-flex items-center justify-center h-4 w-4 rounded-full bg-blue-500 text-[10px] font-bold">
-                  {messages.filter((m) => !m.read).length}
+        <nav className="flex-1 overflow-y-auto py-3 px-3 space-y-0.5">
+          {NAV_ITEMS.map(({ key, label, Icon }) => (
+            <button key={key} onClick={() => { setTab(key); setMobileNav(false); }}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all text-left ${
+                tab === key ? "bg-white text-black font-medium" : "text-white/60 hover:text-white hover:bg-white/5"
+              }`}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              <span className="flex-1">{label}</span>
+              {key === "messages" && unreadCount > 0 && (
+                <span className={`h-5 min-w-5 rounded-full text-[10px] font-bold flex items-center justify-center px-1 ${tab === key ? "bg-black text-white" : "bg-blue-500 text-white"}`}>
+                  {unreadCount}
                 </span>
               )}
             </button>
+          ))}
+        </nav>
+
+        <div className="px-4 py-4 border-t border-white/10 space-y-3">
+          <div className={`flex items-center gap-2 rounded-xl px-3 py-2 text-xs ${
+            supabaseOk === true ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+            : supabaseOk === false ? "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+            : "bg-white/5 text-white/30 border border-white/10"
+          }`}>
+            <div className={`h-1.5 w-1.5 rounded-full ${supabaseOk === true ? "bg-emerald-400" : supabaseOk === false ? "bg-amber-400" : "bg-white/30"}`} />
+            {supabaseOk === true ? "Supabase connected" : supabaseOk === false ? "Supabase not connected" : "Checking..."}
           </div>
+          <div className="flex gap-2">
+            <Link to="/" className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-xs text-white/60 hover:text-white hover:bg-white/10 transition-colors">
+              <ExternalLink className="h-3.5 w-3.5" /> View site
+            </Link>
+            <button onClick={() => { adminLogout(); nav({ to: "/" }); }}
+              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-xs text-white/60 hover:text-red-400 hover:bg-red-500/10 transition-colors">
+              <LogOut className="h-3.5 w-3.5" /> Sign out
+            </button>
+          </div>
+        </div>
+      </aside>
 
-          {tab === "messages" ? (
-            <div className="space-y-3">
-              {messages.length === 0 && (
-                <div className="text-center py-16 text-white/40 text-sm">No messages yet.</div>
-              )}
-              {messages.map((m) => (
-                <motion.div key={m.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-                  className="rounded-2xl glass p-5">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1">
-                      <div className="font-semibold">{m.name}
-                        <span className="text-white/40 text-sm font-normal"> · {m.email}</span>
-                        {m.phone && <span className="text-white/40 text-sm font-normal"> · {m.phone}</span>}
-                      </div>
-                      {m.subject && <div className="mt-1 text-xs text-white/50 font-medium uppercase tracking-wider">{m.subject}</div>}
-                      <p className="mt-2 text-sm text-white/70 whitespace-pre-wrap leading-relaxed">{m.message}</p>
-                    </div>
-                    <span className="text-[10px] text-white/30 whitespace-nowrap shrink-0">
-                      {new Date(m.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
-                </motion.div>
-              ))}
+      {/* Mobile overlay */}
+      {mobileNav && <div className="fixed inset-0 z-40 bg-black/60 lg:hidden" onClick={() => setMobileNav(false)} />}
+
+      {/* Main */}
+      <main className="flex-1 lg:ml-64 min-h-screen flex flex-col">
+        {/* Top bar */}
+        <div className="sticky top-0 z-30 flex items-center gap-4 px-6 py-4 border-b border-white/10 bg-black/90 backdrop-blur-xl">
+          <button onClick={() => setMobileNav(true)} className="lg:hidden p-1.5 rounded-lg hover:bg-white/10 transition-colors">
+            <Layers className="h-5 w-5" />
+          </button>
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-white/40">Dashboard</span>
+            <ChevronRight className="h-3 w-3 text-white/20" />
+            <span className="font-medium">{navLabel}</span>
+          </div>
+          {tab in TABLE_CONFIG && (
+            <div className="ml-auto flex items-center gap-2">
+              <button onClick={add}
+                className="inline-flex items-center gap-1.5 rounded-full bg-white text-black px-4 py-2 text-xs font-medium hover:bg-white/90 transition-colors">
+                <Plus className="h-3.5 w-3.5" /> Add new
+              </button>
+              <button onClick={() => loadTab(tab)}
+                className={`inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs hover:bg-white/10 transition-colors ${loading ? "opacity-50" : ""}`}>
+                <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Refresh
+              </button>
             </div>
-          ) : (
-            <>
-              <div className="flex items-center gap-3 mb-5">
-                <button onClick={add}
-                  className="inline-flex items-center gap-2 rounded-full bg-white text-black px-4 py-2 text-sm font-medium hover:bg-white/90 transition-colors">
-                  <Plus className="h-4 w-4" /> Add new
-                </button>
-                <button onClick={() => loadTab(tab)}
-                  className={`inline-flex items-center gap-2 rounded-full glass px-4 py-2 text-sm hover:bg-white/10 transition-colors ${loading ? "opacity-50" : ""}`}>
-                  <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} /> Refresh
-                </button>
-              </div>
+          )}
+        </div>
 
+        <div className="flex-1 p-6 overflow-auto">
+          {/* Supabase warning */}
+          {supabaseOk === false && (
+            <div className="mb-6 rounded-2xl bg-amber-500/5 border border-amber-500/20 p-4 flex gap-3 items-start">
+              <AlertCircle className="h-4 w-4 text-amber-400 mt-0.5 shrink-0" />
+              <div>
+                <p className="text-sm text-amber-300 font-medium">Supabase not connected</p>
+                <p className="mt-0.5 text-xs text-white/50">
+                  Add <code className="text-white/70">VITE_SUPABASE_URL</code> and <code className="text-white/70">VITE_SUPABASE_PUBLISHABLE_KEY</code> to your environment variables.
+                  The site shows fallback content until then.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* OVERVIEW */}
+          {tab === "overview" && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-xl font-semibold tracking-tight">Good to see you 👋</h2>
+                <p className="text-sm text-white/40 mt-1">Here's a snapshot of your site content.</p>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3">
+                <StatCard label="Services" value={stats.services ?? "—"} Icon={Briefcase} />
+                <StatCard label="Projects" value={stats.projects ?? "—"} Icon={Layers} />
+                <StatCard label="Team members" value={stats.team_members ?? "—"} Icon={Users} />
+                <StatCard label="Blog posts" value={stats.blog_posts ?? "—"} Icon={BookOpen} />
+                <StatCard label="Clients" value={stats.clients ?? "—"} Icon={Globe} />
+                <StatCard label="Testimonials" value={stats.testimonials ?? "—"} Icon={Star} />
+                <StatCard label="Pricing plans" value={stats.pricing_plans ?? "—"} Icon={DollarSign} />
+                <StatCard label="Messages" value={messages.length} Icon={MessageSquare} />
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
+                <h3 className="text-sm font-medium mb-3">Quick actions</h3>
+                <div className="flex flex-wrap gap-2">
+                  {Object.keys(TABLE_CONFIG).map((t) => (
+                    <button key={t} onClick={() => setTab(t)}
+                      className="rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs hover:bg-white/10 transition-colors capitalize">
+                      Edit {t.replace(/_/g, " ")}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* CONTENT TABLE */}
+          {tab in TABLE_CONFIG && (
+            <div className="space-y-4">
               {loading ? (
-                <div className="text-center py-16">
-                  <RefreshCw className="h-6 w-6 animate-spin mx-auto text-white/40" />
-                  <p className="mt-2 text-sm text-white/40">Loading...</p>
+                <div className="flex flex-col items-center py-20 text-white/30">
+                  <RefreshCw className="h-6 w-6 animate-spin" />
+                  <p className="mt-3 text-sm">Loading...</p>
+                </div>
+              ) : rows.length === 0 ? (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-10 text-center">
+                  <div className="h-10 w-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mx-auto mb-3">
+                    <Plus className="h-5 w-5 text-white/30" />
+                  </div>
+                  <p className="text-sm text-white/50 font-medium">No items yet</p>
+                  <p className="text-xs text-white/30 mt-1">The site shows fallback content. Click "Add new" to override with your own.</p>
                 </div>
               ) : (
-                <div className="space-y-4">
-                  {rows.length === 0 && (
-                    <div className="rounded-2xl glass p-8 text-center">
-                      <p className="text-white/40 text-sm">Empty — site shows fallback content.</p>
-                      <p className="text-white/30 text-xs mt-1">Click "Add new" to override with custom content.</p>
-                    </div>
-                  )}
-                  <AnimatePresence>
-                    {rows.map((row, idx) => (
-                      <motion.div
-                        key={row.id}
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -8 }}
-                        className="rounded-2xl glass p-5 space-y-3"
-                      >
-                        <div className="flex items-center gap-2 text-[10px] text-white/30 uppercase tracking-wider mb-1">
-                          <span>#{idx + 1}</span>
-                          {row.title && <span className="text-white/50 font-medium normal-case text-xs tracking-normal">{row.title}</span>}
-                          {row.name && <span className="text-white/50 font-medium normal-case text-xs tracking-normal">{row.name}</span>}
+                <AnimatePresence>
+                  {rows.map((row, idx) => (
+                    <motion.div key={row.id}
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      className={`rounded-2xl border p-5 space-y-4 transition-colors ${
+                        row.visible === false ? "border-white/5 bg-white/[0.01] opacity-60" : "border-white/10 bg-white/[0.03]"
+                      }`}
+                    >
+                      {/* Row header */}
+                      <div className="flex items-center gap-3 justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-white/25 font-mono">#{idx + 1}</span>
+                          <span className="text-sm font-medium text-white/80">{row.title || row.name || row.slug || "Untitled"}</span>
+                          {row.published === true && <span className="rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-[10px] px-2 py-0.5">Published</span>}
+                          {row.published === false && tab === "blog_posts" && <span className="rounded-full bg-white/5 border border-white/10 text-white/30 text-[10px] px-2 py-0.5">Draft</span>}
+                          {row.is_popular && <span className="rounded-full bg-blue-500/15 border border-blue-500/25 text-blue-400 text-[10px] px-2 py-0.5">Popular</span>}
                         </div>
-                        <div className="grid sm:grid-cols-2 gap-3">
-                          {fields.map((f) => {
-                            const val = row[f];
-                            const display = Array.isArray(val)
-                              ? (f === "features" ? val.join("\n") : val.join(", "))
-                              : val ?? "";
-                            const isLong = f === "description" || f === "bio" || f === "quote" || f === "features" || f === "summary";
-                            const isContent = f === "content";
-                            const isBool = f === "is_popular" || f === "published";
-                            return (
-                              <div key={f} className={isLong || isContent ? "sm:col-span-2" : ""}>
-                                <label className="text-[10px] uppercase tracking-wider text-white/40 mb-1 block">{f.replace(/_/g, " ")}</label>
-                                {isBool ? (
-                                  <div className="flex items-center gap-2">
-                                    <input type="checkbox" checked={!!val}
-                                      onChange={(e) => { const next = [...rows]; next[idx][f] = e.target.checked; setRows(next); }}
-                                      className="h-4 w-4 accent-white" />
-                                    <span className="text-sm text-white/60">
-                                      {f === "published" ? (val ? "Published" : "Draft") : (val ? "Popular" : "Standard")}
-                                    </span>
+                        {/* Visible toggle */}
+                        <button
+                          onClick={() => {
+                            const next = [...rows];
+                            next[idx].visible = row.visible === false ? true : false;
+                            setRows(next);
+                          }}
+                          title={row.visible === false ? "Hidden from site — click to show" : "Visible on site — click to hide"}
+                          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] border transition-colors ${
+                            row.visible === false
+                              ? "bg-white/5 border-white/10 text-white/30 hover:text-white/60"
+                              : "bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20"
+                          }`}
+                        >
+                          {row.visible === false ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                          {row.visible === false ? "Hidden" : "Visible"}
+                        </button>
+                      </div>
+
+                      {/* Fields grid */}
+                      <div className="grid sm:grid-cols-2 gap-3">
+                        {fields.filter((f) => f !== "visible").map((f) => {
+                          const val = row[f];
+                          const display = Array.isArray(val)
+                            ? (f === "features" ? val.join("\n") : val.join(", "))
+                            : val ?? "";
+                          const isLong = ["description", "bio", "quote", "features", "summary"].includes(f);
+                          const isContent = f === "content";
+                          const isBool = ["is_popular", "published"].includes(f);
+                          const isImage = IMAGE_FIELDS.includes(f);
+
+                          return (
+                            <div key={f} className={isLong || isContent || isImage ? "sm:col-span-2" : ""}>
+                              <label className="text-[10px] uppercase tracking-wider text-white/35 mb-1.5 block">{f.replace(/_/g, " ")}</label>
+                              {isBool ? (
+                                <label className="flex items-center gap-2 cursor-pointer">
+                                  <div
+                                    onClick={() => { const next = [...rows]; next[idx][f] = !val; setRows(next); }}
+                                    className={`h-5 w-9 rounded-full transition-colors cursor-pointer relative ${val ? "bg-white" : "bg-white/15"}`}
+                                  >
+                                    <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-black transition-all ${val ? "left-[18px]" : "left-0.5"}`} />
                                   </div>
-                                ) : isContent ? (
-                                  <textarea value={display} rows={10}
-                                    onChange={(e) => { const next = [...rows]; next[idx][f] = e.target.value; setRows(next); }}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm focus:border-white/40 outline-none transition-colors resize-y font-mono" />
-                                ) : isLong ? (
-                                  <textarea value={display} rows={3}
-                                    onChange={(e) => { const next = [...rows]; next[idx][f] = e.target.value; setRows(next); }}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm focus:border-white/40 outline-none transition-colors resize-none" />
-                                ) : (
-                                  <input value={display}
-                                    onChange={(e) => { const next = [...rows]; next[idx][f] = e.target.value; setRows(next); }}
-                                    className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-sm focus:border-white/40 outline-none transition-colors" />
-                                )}
+                                  <span className="text-sm text-white/60">{f === "published" ? (val ? "Published" : "Draft") : (val ? "Popular" : "Standard")}</span>
+                                </label>
+                              ) : isImage ? (
+                                <ImageField value={display} onChange={(v) => { const next = [...rows]; next[idx][f] = v; setRows(next); }} />
+                              ) : isContent ? (
+                                <textarea value={display} rows={10}
+                                  onChange={(e) => { const next = [...rows]; next[idx][f] = e.target.value; setRows(next); }}
+                                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors resize-y font-mono leading-relaxed" />
+                              ) : isLong ? (
+                                <textarea value={display} rows={3}
+                                  onChange={(e) => { const next = [...rows]; next[idx][f] = e.target.value; setRows(next); }}
+                                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors resize-none leading-relaxed" />
+                              ) : (
+                                <input value={display}
+                                  onChange={(e) => { const next = [...rows]; next[idx][f] = e.target.value; setRows(next); }}
+                                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors" />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      {/* Row actions */}
+                      <div className="flex gap-2 pt-3 border-t border-white/8">
+                        <button onClick={() => save(row)} disabled={saving === row.id}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-white text-black px-5 py-2 text-xs font-medium hover:bg-white/90 transition-colors disabled:opacity-50">
+                          {saving === row.id ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                          {saving === row.id ? "Saving..." : "Save changes"}
+                        </button>
+                        <button onClick={() => del(row.id)}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/50 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-colors">
+                          <Trash2 className="h-3 w-3" /> Delete
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              )}
+            </div>
+          )}
+
+          {/* MESSAGES */}
+          {tab === "messages" && (
+            <div className="space-y-3 max-w-3xl">
+              {messages.length === 0 ? (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-16 text-center">
+                  <Inbox className="h-8 w-8 text-white/20 mx-auto mb-3" />
+                  <p className="text-sm text-white/40">Your inbox is empty</p>
+                  <p className="text-xs text-white/25 mt-1">Messages from your contact form will appear here.</p>
+                </div>
+              ) : (
+                <>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="text-sm text-white/50">{messages.length} message{messages.length !== 1 ? "s" : ""}</span>
+                    {unreadCount > 0 && <span className="rounded-full bg-blue-500/20 text-blue-400 border border-blue-500/30 text-[10px] px-2 py-0.5">{unreadCount} unread</span>}
+                  </div>
+                  <AnimatePresence>
+                    {messages.map((m) => (
+                      <motion.div key={m.id}
+                        initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                        className={`rounded-2xl border p-5 transition-colors ${
+                          !m.read ? "border-blue-500/20 bg-blue-500/[0.04]" : "border-white/8 bg-white/[0.02]"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="h-9 w-9 rounded-full bg-white/10 border border-white/10 flex items-center justify-center shrink-0 text-sm font-semibold">
+                              {(m.name || "?")[0].toUpperCase()}
+                            </div>
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium flex items-center gap-2">
+                                {m.name}
+                                {!m.read && <span className="h-1.5 w-1.5 rounded-full bg-blue-400 shrink-0" />}
                               </div>
-                            );
-                          })}
+                              <div className="text-xs text-white/40 truncate">{m.email}{m.phone ? ` · ${m.phone}` : ""}</div>
+                            </div>
+                          </div>
+                          <span className="text-[11px] text-white/25 whitespace-nowrap shrink-0">
+                            {new Date(m.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                          </span>
                         </div>
-                        <div className="flex gap-2 pt-3 border-t border-white/10">
-                          <button onClick={() => save(row)}
-                            disabled={saving === row.id}
-                            className="inline-flex items-center gap-1.5 rounded-full bg-white text-black px-4 py-2 text-xs font-medium hover:bg-white/90 transition-colors disabled:opacity-50">
-                            {saving === row.id ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
-                            {saving === row.id ? "Saving..." : "Save"}
-                          </button>
-                          <button onClick={() => del(row.id)}
-                            className="inline-flex items-center gap-1.5 rounded-full glass px-4 py-2 text-xs hover:bg-red-500/20 hover:border-red-500/30 transition-colors">
-                            <Trash2 className="h-3 w-3" /> Delete
+                        {m.subject && (
+                          <div className="mt-3 text-xs font-semibold uppercase tracking-wider text-white/40">{m.subject}</div>
+                        )}
+                        <p className="mt-2 text-sm text-white/70 whitespace-pre-wrap leading-relaxed">{m.message}</p>
+                        <div className="mt-4 flex items-center gap-2 pt-3 border-t border-white/8">
+                          <a href={`mailto:${m.email}?subject=Re: ${encodeURIComponent(m.subject || "Your message")}`}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-white text-black px-4 py-2 text-xs font-medium hover:bg-white/90 transition-colors">
+                            <Send className="h-3 w-3" /> Reply via email
+                          </a>
+                          {!m.read && (
+                            <button onClick={() => markRead(m.id)}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/50 hover:text-white hover:bg-white/10 transition-colors">
+                              <CheckCircle className="h-3 w-3" /> Mark read
+                            </button>
+                          )}
+                          <button onClick={() => deleteMessage(m.id)}
+                            className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-white/8 px-3 py-2 text-xs text-white/30 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-colors">
+                            <Trash2 className="h-3 w-3" />
                           </button>
                         </div>
                       </motion.div>
                     ))}
                   </AnimatePresence>
-                </div>
+                </>
               )}
-            </>
+            </div>
+          )}
+
+          {/* SETTINGS */}
+          {tab === "settings" && (
+            <div className="max-w-2xl space-y-8">
+              <div>
+                <h2 className="text-lg font-semibold tracking-tight">Site Settings</h2>
+                <p className="text-sm text-white/40 mt-1">Changes save to Supabase and appear on your site immediately.</p>
+              </div>
+              {SETTINGS_FIELDS.map(({ group, items }) => (
+                <div key={group} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 space-y-4">
+                  <h3 className="text-xs uppercase tracking-[0.2em] text-white/40 pb-2 border-b border-white/8">{group}</h3>
+                  {items.map(({ key, label, placeholder }) => (
+                    <div key={key} className="space-y-1.5">
+                      <label className="text-xs text-white/60 font-medium">{label}</label>
+                      <input
+                        value={settingsValues[key] ?? ""}
+                        onChange={(e) => setSettingsValues((prev) => ({ ...prev, [key]: e.target.value }))}
+                        placeholder={placeholder}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors placeholder:text-white/20"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ))}
+              <div className="flex items-center gap-3">
+                <button onClick={saveSettings} disabled={settingsSaving || supabaseOk === false}
+                  className="inline-flex items-center gap-2 rounded-full bg-white text-black px-6 py-2.5 text-sm font-medium hover:bg-white/90 transition-colors disabled:opacity-50">
+                  {settingsSaving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  {settingsSaving ? "Saving..." : "Save all settings"}
+                </button>
+                {supabaseOk === false && (
+                  <p className="text-xs text-amber-400">Connect Supabase first to save settings.</p>
+                )}
+              </div>
+            </div>
           )}
         </div>
-      </section>
-    </SiteLayout>
+      </main>
+    </div>
   );
 }

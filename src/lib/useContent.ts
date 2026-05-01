@@ -14,7 +14,10 @@ function useTable<T>(table: string, fallback: T[], orderBy = "sort_order") {
       try {
         const { data: rows, error } = await supabase.from(table as any).select("*").order(orderBy, { ascending: true });
         if (!active) return;
-        if (!error && rows && rows.length > 0) setData(rows as T[]);
+        if (!error && rows && rows.length > 0) {
+          const visible = rows.filter((r: any) => r.visible !== false);
+          setData((visible.length > 0 ? visible : rows) as T[]);
+        }
       } catch {
         // Supabase not configured — keep fallback
       }
@@ -44,7 +47,10 @@ export function useBlogPosts(publishedOnly = true) {
         if (publishedOnly) query = (query as any).eq("published", true);
         const { data: rows, error } = await query;
         if (!active) return;
-        if (!error && rows && rows.length > 0) setData(rows as any[]);
+        if (!error && rows && rows.length > 0) {
+          const visible = rows.filter((r: any) => r.visible !== false);
+          setData((visible.length > 0 ? visible : rows) as any[]);
+        }
       } catch {
         // Supabase not configured
       }
@@ -96,4 +102,9 @@ export function useSiteContent() {
     return () => { active = false; };
   }, []);
   return content;
+}
+
+export async function saveSiteContentKey(key: string, value: any) {
+  const { error: upsertErr } = await supabase.from("site_content" as any).upsert({ key, value: { v: value } }, { onConflict: "key" });
+  return !upsertErr;
 }

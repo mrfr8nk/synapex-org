@@ -32,6 +32,23 @@ public/             # Static assets (logo, favicon)
 supabase/           # Supabase config + migrations
 ```
 
+## Admin Dashboard (`/admin`)
+- Sidebar layout with navigation, Supabase status, sign out
+- **Overview** — stats cards with counts per table
+- **Content sections** — Services, Projects, Tech Stack, Clients, Testimonials, Team, Pricing, Blog Posts
+  - Per-row **Visible/Hidden toggle** — hide any item from the frontend without deleting it
+  - Image fields (`image_url`, `logo_url`, `avatar_url`) show Upload button + URL input (uses Supabase Storage `images` bucket)
+- **Messages inbox** — contact form submissions with mark-read, reply via email, delete
+- **Site Settings** — social links, contact info, footer tagline, hero text (stored in `site_content` table)
+- Demo credentials: `mrfrankofc` / `1234`
+
+## Key Files
+- `src/lib/content.ts` — fallback data (used when Supabase not connected)
+- `src/lib/useContent.ts` — data hooks; filters `visible !== false`, includes `saveSiteContentKey()`
+- `src/components/Footer.tsx` — social links pulled from `useSiteContent()` dynamically
+- `src/routes/admin.tsx` — full admin dashboard (sidebar layout, no SiteLayout wrapper)
+- `supabase/migrations/` — SQL migrations including `visible` column + `site_content` table
+
 ## Dev Server
 - Host: `0.0.0.0`, Port: `5000`
 - Command: `bun run dev`

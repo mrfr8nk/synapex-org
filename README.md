@@ -155,6 +155,8 @@ src/
 
 ### Deploy on Render (Recommended — easiest, works out of the box)
 
+> **What caused the blank white screen?** The original start command used `bun --env-file=.env` which fails on Render because there is no `.env` file — Render injects env vars directly. This is now fixed; the start command is just `bun dist/server/server.js`.
+
 1. Push your code to GitHub / GitLab.
 2. Go to [render.com](https://render.com) → **New** → **Web Service**.
 3. Connect your repository.
@@ -166,14 +168,24 @@ src/
    | **Build Command** | `npm install -g bun && bun install && bun run build` |
    | **Start Command** | `bun dist/server/server.js` |
 
-5. Under **Environment Variables**, add any you need (e.g. Supabase keys — optional):
-   ```
-   VITE_SUPABASE_URL=https://your-project.supabase.co
-   VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
-   ```
+5. Under **Environment Variables**, add these:
+
+   | Variable | Value | Required |
+   |---|---|---|
+   | `PORT` | `5000` | **Yes** — tells Render which port your server listens on |
+   | `VITE_SUPABASE_URL` | `https://your-project.supabase.co` | No (optional CMS) |
+   | `VITE_SUPABASE_PUBLISHABLE_KEY` | `your-anon-key` | No (optional CMS) |
+
 6. Click **Create Web Service**. Render will build and deploy automatically.
 
 That's it. Refreshes, deep links, and all routes work correctly because Render runs the SSR server.
+
+#### Supabase Storage (for image uploads in admin)
+1. In your Supabase dashboard → **Storage** → Create a new bucket named exactly `images`
+2. Set the bucket to **Public**
+3. Go to **Policies** and allow authenticated or anon uploads as needed
+
+Then in the admin at `/admin`, image fields will show an **Upload** button alongside the URL input.
 
 ---
 

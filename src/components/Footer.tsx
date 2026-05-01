@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { Github, Twitter, Linkedin, Instagram, ArrowUpRight } from "lucide-react";
+import { Github, Twitter, Linkedin, Instagram, Facebook, Youtube, ArrowUpRight } from "lucide-react";
+import { useSiteContent } from "@/lib/useContent";
 
 const cols = [
   {
@@ -30,14 +31,19 @@ const cols = [
   },
 ];
 
-const socials = [
-  { Icon: Github, href: "https://github.com/synapex-dev", label: "GitHub" },
-  { Icon: Twitter, href: "https://twitter.com/synapex_dev", label: "Twitter" },
-  { Icon: Linkedin, href: "https://linkedin.com/company/synapex", label: "LinkedIn" },
-  { Icon: Instagram, href: "https://instagram.com/synapex_dev", label: "Instagram" },
+const SOCIAL_MAP = [
+  { key: "social_github", Icon: Github, label: "GitHub" },
+  { key: "social_twitter", Icon: Twitter, label: "Twitter" },
+  { key: "social_linkedin", Icon: Linkedin, label: "LinkedIn" },
+  { key: "social_instagram", Icon: Instagram, label: "Instagram" },
+  { key: "social_facebook", Icon: Facebook, label: "Facebook" },
+  { key: "social_youtube", Icon: Youtube, label: "YouTube" },
 ];
 
 export function Footer() {
+  const c = useSiteContent();
+  const socials = SOCIAL_MAP.filter(({ key }) => !!c[key]);
+
   return (
     <footer className="relative mt-24 border-t border-white/10">
       <div className="absolute inset-0 stars opacity-20 pointer-events-none" />
@@ -49,16 +55,16 @@ export function Footer() {
               <span className="font-semibold tracking-tight">SYNAPEX DEVELOPERS</span>
             </Link>
             <p className="mt-5 text-sm text-white/50 max-w-sm leading-relaxed">
-              Engineering premium software, AI systems and digital experiences for ambitious teams worldwide.
+              {c.footer_tagline}
             </p>
             <p className="mt-3 text-xs text-white/30">
               Harare, Zimbabwe &middot; Remote-first
             </p>
-            <div className="mt-6 flex gap-2">
-              {socials.map(({ Icon, href, label }) => (
+            <div className="mt-6 flex gap-2 flex-wrap">
+              {socials.map(({ Icon, key, label }) => (
                 <a
-                  key={label}
-                  href={href}
+                  key={key}
+                  href={c[key]}
                   target="_blank"
                   rel="noopener noreferrer"
                   aria-label={label}

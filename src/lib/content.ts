@@ -147,6 +147,13 @@ export const fallbackContent: Record<string, any> = {
   contact_email: "contact@synapex.co.zw",
   contact_whatsapp: "+263 719 647 303",
   contact_location: "Harare, Zimbabwe — serving worldwide",
+  social_github: "https://github.com/synapex-dev",
+  social_twitter: "https://twitter.com/synapex_dev",
+  social_linkedin: "https://linkedin.com/company/synapex",
+  social_instagram: "https://instagram.com/synapex_dev",
+  social_facebook: "",
+  social_youtube: "",
+  footer_tagline: "Engineering premium software, AI systems and digital experiences for ambitious teams worldwide.",
 };
 
 export const fallbackBlogPosts = [
