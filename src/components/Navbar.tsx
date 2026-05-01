@@ -1,13 +1,14 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { Menu, X, Sparkles } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const links = [
   { to: "/", label: "Home" },
   { to: "/about", label: "About" },
   { to: "/services", label: "Services" },
-  { to: "/projects", label: "Projects" },
+  { to: "/projects", label: "Work" },
+  { to: "/team", label: "Team" },
   { to: "/pricing", label: "Pricing" },
   { to: "/contact", label: "Contact" },
 ] as const;
@@ -18,9 +19,9 @@ export function Navbar() {
   const path = useRouterState({ select: (s) => s.location.pathname });
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
-    window.addEventListener("scroll", onScroll);
+    window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
@@ -28,101 +29,105 @@ export function Navbar() {
 
   return (
     <motion.header
-      initial={{ y: -40, opacity: 0 }}
+      initial={{ y: -20, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className="fixed top-0 left-0 right-0 z-50 flex justify-center px-4 pt-4"
+      transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+      className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${
+        scrolled ? "py-2" : "py-4"
+      }`}
     >
-      <nav
-        className={`w-full max-w-6xl rounded-2xl transition-all duration-500 ${
-          scrolled ? "glass shadow-glow" : "bg-transparent"
-        }`}
-      >
-        <div className="flex items-center justify-between px-5 py-3">
-          <Link to="/" className="group flex items-center gap-2">
-            <div className="relative">
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-primary to-purple blur-md opacity-60 group-hover:opacity-100 transition-opacity" />
-              <div className="relative h-9 w-9 rounded-lg bg-gradient-to-br from-primary via-accent to-purple flex items-center justify-center">
-                <Sparkles className="h-5 w-5 text-white" />
+      <div className="px-4">
+        <nav
+          className={`mx-auto max-w-7xl rounded-full transition-all duration-500 ${
+            scrolled ? "glass-nav" : "bg-transparent"
+          }`}
+        >
+          <div className="flex items-center justify-between px-5 py-2.5">
+            <Link to="/" className="flex items-center gap-2 group">
+              <div className="h-7 w-7 rounded-full bg-white flex items-center justify-center">
+                <span className="text-black text-[10px] font-bold tracking-tighter">SX</span>
               </div>
-            </div>
-            <span className="font-bold text-lg tracking-tight">
-              Synapex<span className="text-gradient">.</span>
-            </span>
-          </Link>
-
-          <div className="hidden md:flex items-center gap-1">
-            {links.map((l) => {
-              const active = path === l.to;
-              return (
-                <Link
-                  key={l.to}
-                  to={l.to}
-                  className="relative px-4 py-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {active && (
-                    <motion.span
-                      layoutId="nav-active"
-                      className="absolute inset-0 rounded-lg bg-white/5 border border-white/10"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                  <span className="relative">{l.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-
-          <div className="hidden md:block">
-            <Link
-              to="/contact"
-              className="relative inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white overflow-hidden group"
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-primary via-accent to-purple animate-gradient" />
-              <span className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity bg-gradient-to-r from-purple via-primary to-accent" />
-              <span className="relative">Start a Project</span>
+              <span className="font-semibold text-sm tracking-tight">SYNAPEX</span>
             </Link>
-          </div>
 
-          <button
-            className="md:hidden p-2 text-foreground"
-            onClick={() => setOpen((v) => !v)}
-            aria-label="Toggle menu"
-          >
-            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-          </button>
-        </div>
-
-        <AnimatePresence>
-          {open && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="md:hidden overflow-hidden border-t border-white/10"
-            >
-              <div className="flex flex-col p-4 gap-1">
-                {links.map((l) => (
+            <div className="hidden md:flex items-center gap-1">
+              {links.map((l) => {
+                const active = path === l.to;
+                return (
                   <Link
                     key={l.to}
                     to={l.to}
-                    className="px-4 py-3 rounded-lg text-sm hover:bg-white/5 transition-colors"
-                    activeProps={{ className: "px-4 py-3 rounded-lg text-sm bg-white/5 text-foreground" }}
+                    className="relative px-3.5 py-1.5 text-[13px] text-white/60 hover:text-white transition-colors"
                   >
-                    {l.label}
+                    {active && (
+                      <motion.span
+                        layoutId="nav-indicator"
+                        className="absolute inset-0 rounded-full bg-white/10 hairline"
+                        transition={{ type: "spring", stiffness: 400, damping: 32 }}
+                      />
+                    )}
+                    <span className="relative">{l.label}</span>
                   </Link>
-                ))}
-                <Link
-                  to="/contact"
-                  className="mt-2 text-center rounded-xl px-5 py-3 text-sm font-medium text-white bg-gradient-to-r from-primary via-accent to-purple animate-gradient"
-                >
-                  Start a Project
-                </Link>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
+                );
+              })}
+            </div>
+
+            <div className="hidden md:block">
+              <Link
+                to="/contact"
+                className="inline-flex items-center rounded-full bg-white text-black px-4 py-1.5 text-[13px] font-medium hover:bg-white/90 transition-colors"
+              >
+                Get started
+              </Link>
+            </div>
+
+            <button
+              className="md:hidden p-1 text-white"
+              onClick={() => setOpen((v) => !v)}
+              aria-label="Toggle menu"
+            >
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+            </button>
+          </div>
+
+          <AnimatePresence>
+            {open && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                className="md:hidden overflow-hidden"
+              >
+                <div className="border-t border-white/10 px-2 py-3 flex flex-col gap-0.5">
+                  {links.map((l, i) => (
+                    <motion.div
+                      key={l.to}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: i * 0.04 }}
+                    >
+                      <Link
+                        to={l.to}
+                        className="block px-4 py-2.5 rounded-xl text-sm text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+                        activeProps={{ className: "block px-4 py-2.5 rounded-xl text-sm bg-white/10 text-white" }}
+                      >
+                        {l.label}
+                      </Link>
+                    </motion.div>
+                  ))}
+                  <Link
+                    to="/contact"
+                    className="mt-2 mx-2 text-center rounded-full bg-white text-black px-4 py-2.5 text-sm font-medium"
+                  >
+                    Get started
+                  </Link>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </nav>
+      </div>
     </motion.header>
   );
 }

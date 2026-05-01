@@ -1,30 +1,57 @@
 import { Link } from "@tanstack/react-router";
-import { Sparkles, Github, Twitter, Linkedin, Instagram, Mail } from "lucide-react";
+import { Github, Twitter, Linkedin, Instagram, ArrowUpRight } from "lucide-react";
+
+const cols = [
+  {
+    title: "Company",
+    links: [
+      { to: "/about", label: "About" },
+      { to: "/team", label: "Team" },
+      { to: "/projects", label: "Work" },
+      { to: "/pricing", label: "Pricing" },
+    ],
+  },
+  {
+    title: "Services",
+    links: [
+      { to: "/services", label: "Web Development" },
+      { to: "/services", label: "Mobile Apps" },
+      { to: "/services", label: "AI Integration" },
+      { to: "/services", label: "SaaS Platforms" },
+    ],
+  },
+  {
+    title: "Connect",
+    links: [
+      { to: "/contact", label: "Start a project" },
+      { to: "/contact", label: "hello@synapex.dev" },
+      { to: "/admin", label: "Admin" },
+    ],
+  },
+];
 
 export function Footer() {
   return (
-    <footer className="relative mt-32 border-t border-white/10">
-      <div className="absolute inset-x-0 -top-px h-px bg-gradient-to-r from-transparent via-primary to-transparent" />
-      <div className="absolute inset-0 bg-radial-glow opacity-40 pointer-events-none" />
+    <footer className="relative mt-24 border-t border-white/10">
+      <div className="absolute inset-0 stars opacity-20 pointer-events-none" />
       <div className="relative max-w-7xl mx-auto px-6 py-16">
-        <div className="grid gap-12 md:grid-cols-4">
-          <div className="md:col-span-2">
-            <div className="flex items-center gap-2">
-              <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-primary via-accent to-purple flex items-center justify-center">
-                <Sparkles className="h-5 w-5 text-white" />
+        <div className="grid gap-12 lg:grid-cols-5">
+          <div className="lg:col-span-2">
+            <Link to="/" className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-full bg-white flex items-center justify-center">
+                <span className="text-black text-xs font-bold">SX</span>
               </div>
-              <span className="font-bold text-lg">Synapex Developers</span>
-            </div>
-            <p className="mt-4 text-sm text-muted-foreground max-w-md">
-              Young African developers building world-class software, AI systems and digital
-              experiences for businesses, startups, and creators worldwide.
+              <span className="font-semibold tracking-tight">SYNAPEX DEVELOPERS</span>
+            </Link>
+            <p className="mt-5 text-sm text-white/50 max-w-sm leading-relaxed">
+              Engineering premium software, AI systems and digital experiences for ambitious teams worldwide.
             </p>
-            <div className="mt-6 flex gap-3">
-              {[Github, Twitter, Linkedin, Instagram, Mail].map((Icon, i) => (
+            <div className="mt-6 flex gap-2">
+              {[Github, Twitter, Linkedin, Instagram].map((Icon, i) => (
                 <a
                   key={i}
                   href="#"
-                  className="h-10 w-10 rounded-lg glass flex items-center justify-center hover:shadow-glow transition-all hover:-translate-y-0.5"
+                  className="h-9 w-9 rounded-full glass hairline-hover flex items-center justify-center transition-all hover:-translate-y-0.5"
                 >
                   <Icon className="h-4 w-4" />
                 </a>
@@ -32,29 +59,27 @@ export function Footer() {
             </div>
           </div>
 
-          <div>
-            <h4 className="font-semibold mb-4">Company</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li><Link to="/about" className="hover:text-foreground transition-colors">About</Link></li>
-              <li><Link to="/services" className="hover:text-foreground transition-colors">Services</Link></li>
-              <li><Link to="/projects" className="hover:text-foreground transition-colors">Projects</Link></li>
-              <li><Link to="/pricing" className="hover:text-foreground transition-colors">Pricing</Link></li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Contact</h4>
-            <ul className="space-y-2 text-sm text-muted-foreground">
-              <li>hello@synapex.dev</li>
-              <li>Harare, Zimbabwe</li>
-              <li><Link to="/contact" className="hover:text-foreground transition-colors">Start a project →</Link></li>
-            </ul>
-          </div>
+          {cols.map((col) => (
+            <div key={col.title}>
+              <h4 className="text-xs uppercase tracking-[0.2em] text-white/40 mb-4">{col.title}</h4>
+              <ul className="space-y-2.5 text-sm">
+                {col.links.map((l, i) => (
+                  <li key={i}>
+                    <Link to={l.to} className="text-white/70 hover:text-white transition-colors story-link">
+                      {l.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))}
         </div>
 
-        <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between gap-4 text-xs text-muted-foreground">
+        <div className="mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between gap-4 text-xs text-white/40">
           <p>© {new Date().getFullYear()} Synapex Developers. All rights reserved.</p>
-          <p>Crafted with code, caffeine & curiosity.</p>
+          <p className="flex items-center gap-1">
+            Built in Harare <ArrowUpRight className="h-3 w-3" /> for the world
+          </p>
         </div>
       </div>
     </footer>
