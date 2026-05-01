@@ -14,7 +14,276 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      clients: {
+        Row: {
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          sort_order: number
+          website_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          sort_order?: number
+          website_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          sort_order?: number
+          website_url?: string | null
+        }
+        Relationships: []
+      }
+      contact_messages: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+          read: boolean
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+          read?: boolean
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+          read?: boolean
+        }
+        Relationships: []
+      }
+      pricing_plans: {
+        Row: {
+          created_at: string
+          description: string
+          features: string[]
+          id: string
+          is_popular: boolean
+          name: string
+          price: string
+          sort_order: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          features?: string[]
+          id?: string
+          is_popular?: boolean
+          name: string
+          price: string
+          sort_order?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          features?: string[]
+          id?: string
+          is_popular?: boolean
+          name?: string
+          price?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      projects: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          github_url: string | null
+          id: string
+          image_url: string | null
+          live_url: string | null
+          sort_order: number
+          tech: string[]
+          title: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description: string
+          github_url?: string | null
+          id?: string
+          image_url?: string | null
+          live_url?: string | null
+          sort_order?: number
+          tech?: string[]
+          title: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          github_url?: string | null
+          id?: string
+          image_url?: string | null
+          live_url?: string | null
+          sort_order?: number
+          tech?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          created_at: string
+          description: string
+          icon: string
+          id: string
+          sort_order: number
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          icon?: string
+          id?: string
+          sort_order?: number
+          title: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          icon?: string
+          id?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          id: string
+          key: string
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          id?: string
+          key: string
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          id?: string
+          key?: string
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          bio: string | null
+          created_at: string
+          github_url: string | null
+          id: string
+          image_url: string | null
+          linkedin_url: string | null
+          name: string
+          role: string
+          sort_order: number
+          twitter_url: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          github_url?: string | null
+          id?: string
+          image_url?: string | null
+          linkedin_url?: string | null
+          name: string
+          role: string
+          sort_order?: number
+          twitter_url?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          github_url?: string | null
+          id?: string
+          image_url?: string | null
+          linkedin_url?: string | null
+          name?: string
+          role?: string
+          sort_order?: number
+          twitter_url?: string | null
+        }
+        Relationships: []
+      }
+      tech_stack: {
+        Row: {
+          category: string | null
+          created_at: string
+          id: string
+          name: string
+          sort_order: number
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          sort_order?: number
+        }
+        Update: {
+          category?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
+      testimonials: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          id: string
+          name: string
+          quote: string
+          rating: number
+          role: string
+          sort_order: number
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          quote: string
+          rating?: number
+          role: string
+          sort_order?: number
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          quote?: string
+          rating?: number
+          role?: string
+          sort_order?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
