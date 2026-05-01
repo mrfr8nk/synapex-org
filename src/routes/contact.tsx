@@ -4,6 +4,8 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { Mail, MapPin, MessageCircle, Send, CheckCircle2 } from "lucide-react";
 import { z } from "zod";
+import { useSiteContent } from "@/lib/useContent";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -24,11 +26,13 @@ const schema = z.object({
 });
 
 function ContactPage() {
+  const c = useSiteContent();
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [sent, setSent] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     const r = schema.safeParse(form);
     if (!r.success) {
@@ -38,38 +42,55 @@ function ContactPage() {
       return;
     }
     setErrors({});
+    setSubmitting(true);
+    const { error } = await supabase.from("contact_messages").insert(r.data);
+    setSubmitting(false);
+    if (error) {
+      setErrors({ message: "Something went wrong. Try again." });
+      return;
+    }
     setSent(true);
   };
 
   return (
     <SiteLayout>
-      <section className="relative py-20 px-6 overflow-hidden">
-        <div className="absolute inset-0 bg-radial-glow" />
+      <section className="relative pt-32 pb-20 px-6 overflow-hidden">
+        <div className="absolute inset-0 stars" />
+        <div className="absolute inset-0 spotlight" />
         <div className="relative max-w-6xl mx-auto grid gap-12 lg:grid-cols-2">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7 }}
           >
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tighter">
-              Let's build <span className="text-gradient">something great.</span>
+            <div className="inline-flex items-center gap-2 rounded-full glass px-3.5 py-1 text-[11px] uppercase tracking-[0.2em] text-white/60 mb-6">
+              <span className="h-1.5 w-1.5 rounded-full bg-white animate-glow-pulse" /> Contact
+            </div>
+            <h1 className="text-5xl md:text-6xl font-semibold tracking-[-0.04em] leading-[0.95] text-fade">
+              Let's build something great.
             </h1>
-            <p className="mt-6 text-lg text-muted-foreground">
-              Tell us about your idea, timeline and budget. We'll come back within 24 hours
-              with a clear plan.
+            <p className="mt-6 text-lg text-white/60 leading-relaxed">
+              Tell us about your idea, timeline and budget. We'll come back within 24 hours with a clear plan.
             </p>
 
-            <div className="mt-10 space-y-4">
+            <div className="mt-10 space-y-3">
               {[
-                { icon: Mail, label: "hello@synapex.dev" },
-                { icon: MessageCircle, label: "WhatsApp: +263 78 000 0000" },
-                { icon: MapPin, label: "Harare, Zimbabwe — serving worldwide" },
-              ].map((c, i) => (
-                <div key={i} className="flex items-center gap-4 rounded-xl glass p-4">
-                  <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary to-purple flex items-center justify-center">
-                    <c.icon className="h-5 w-5 text-white" />
+                { icon: Mail, label: c.contact_email },
+                { icon: MessageCircle, label: c.contact_whatsapp },
+                { icon: MapPin, label: c.contact_location },
+              ].map((item, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3 + i * 0.08 }}
+                  className="flex items-center gap-4 rounded-2xl glass p-4 hairline-hover transition-all"
+                >
+                  <div className="h-9 w-9 rounded-xl glass-strong flex items-center justify-center">
+                    <item.icon className="h-4 w-4" />
                   </div>
-                  <span className="text-sm">{c.label}</span>
-                </div>
+                  <span className="text-sm text-white/80">{item.label}</span>
+                </motion.div>
               ))}
             </div>
           </motion.div>
@@ -77,15 +98,20 @@ function ContactPage() {
           <motion.form
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.7 }}
             onSubmit={submit}
-            className="rounded-3xl glass p-8 space-y-5"
+            className="rounded-3xl glass-strong p-8 space-y-5"
           >
             {sent ? (
-              <div className="flex flex-col items-center text-center py-12">
-                <CheckCircle2 className="h-16 w-16 text-cyan" />
-                <h3 className="mt-4 text-2xl font-semibold">Message sent!</h3>
-                <p className="mt-2 text-muted-foreground">We'll be in touch within 24 hours.</p>
-              </div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="flex flex-col items-center text-center py-12"
+              >
+                <CheckCircle2 className="h-16 w-16" />
+                <h3 className="mt-4 text-2xl font-semibold tracking-tight">Message sent.</h3>
+                <p className="mt-2 text-white/50">We'll be in touch within 24 hours.</p>
+              </motion.div>
             ) : (
               <>
                 <Field label="Your name" error={errors.name}>
@@ -93,7 +119,7 @@ function ContactPage() {
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     maxLength={100}
-                    className="w-full bg-transparent border-b border-white/20 py-3 outline-none focus:border-cyan transition-colors"
+                    className="w-full bg-transparent border-b border-white/15 py-3 outline-none focus:border-white transition-colors text-white placeholder:text-white/30"
                     placeholder="Jane Doe"
                   />
                 </Field>
@@ -103,7 +129,7 @@ function ContactPage() {
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     maxLength={255}
-                    className="w-full bg-transparent border-b border-white/20 py-3 outline-none focus:border-cyan transition-colors"
+                    className="w-full bg-transparent border-b border-white/15 py-3 outline-none focus:border-white transition-colors text-white placeholder:text-white/30"
                     placeholder="jane@company.com"
                   />
                 </Field>
@@ -113,16 +139,17 @@ function ContactPage() {
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
                     maxLength={1000}
                     rows={5}
-                    className="w-full bg-transparent border-b border-white/20 py-3 outline-none focus:border-cyan transition-colors resize-none"
+                    className="w-full bg-transparent border-b border-white/15 py-3 outline-none focus:border-white transition-colors resize-none text-white placeholder:text-white/30"
                     placeholder="Tell us what you'd like to build..."
                   />
                 </Field>
                 <button
                   type="submit"
-                  className="group w-full inline-flex items-center justify-center gap-2 rounded-xl py-4 text-sm font-medium text-white bg-gradient-to-r from-primary via-accent to-purple animate-gradient shadow-glow hover:shadow-glow-strong transition-shadow"
+                  disabled={submitting}
+                  className="group w-full inline-flex items-center justify-center gap-2 rounded-full py-3.5 text-sm font-medium bg-white text-black hover:bg-white/90 transition-all disabled:opacity-50"
                 >
-                  Send message
-                  <Send className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                  {submitting ? "Sending..." : "Send message"}
+                  <Send className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </>
             )}
@@ -136,9 +163,9 @@ function ContactPage() {
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="text-xs uppercase tracking-wider text-muted-foreground">{label}</label>
+      <label className="text-[11px] uppercase tracking-[0.2em] text-white/40">{label}</label>
       {children}
-      {error && <p className="mt-1 text-xs text-destructive">{error}</p>}
+      {error && <p className="mt-1 text-xs text-red-400">{error}</p>}
     </div>
   );
 }
