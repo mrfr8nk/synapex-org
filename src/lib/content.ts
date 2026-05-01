@@ -24,12 +24,12 @@ export const fallbackServices = [
 ];
 
 export const fallbackProjects = [
-  { id: "p1", title: "NeuroDash", category: "SaaS", description: "AI-powered analytics dashboard with realtime insights and custom reporting.", tech: ["Next.js", "OpenAI", "PostgreSQL"], live_url: null, github_url: null, image_url: null },
-  { id: "p2", title: "EduFlow", category: "School System", description: "School management platform deployed across 50+ institutions in 3 countries.", tech: ["React", "Node.js", "MongoDB"], live_url: null, github_url: null, image_url: null },
-  { id: "p3", title: "ChatPilot", category: "AI Bot", description: "WhatsApp + Web AI assistant handling thousands of concurrent conversations.", tech: ["Python", "Twilio", "GPT-4"], live_url: null, github_url: null, image_url: null },
-  { id: "p4", title: "Vaultify", category: "Mobile", description: "Personal finance tracker with bank-grade encryption and beautiful UI.", tech: ["React Native", "Firebase"], live_url: null, github_url: null, image_url: null },
-  { id: "p5", title: "Pulse Commerce", category: "Web", description: "Headless e-commerce achieving 99 Lighthouse score with sub-second loads.", tech: ["Next.js", "Stripe"], live_url: null, github_url: null, image_url: null },
-  { id: "p6", title: "Lumen API", category: "API", description: "Image generation API serving over 1M+ requests per month with 99.9% uptime.", tech: ["FastAPI", "Docker"], live_url: null, github_url: null, image_url: null },
+  { id: "p1", title: "NeuroDash", category: "SaaS", description: "AI-powered analytics dashboard with realtime insights and custom reporting for enterprise teams.", tech: ["Next.js", "OpenAI", "PostgreSQL"], live_url: "#", github_url: null, image_url: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80" },
+  { id: "p2", title: "EduFlow", category: "School System", description: "School management platform deployed across 50+ institutions in 3 countries, used by 10,000+ students.", tech: ["React", "Node.js", "MongoDB"], live_url: "#", github_url: null, image_url: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=800&q=80" },
+  { id: "p3", title: "ChatPilot", category: "AI Bot", description: "WhatsApp + Web AI assistant handling thousands of concurrent conversations with sub-100ms response time.", tech: ["Python", "Twilio", "GPT-4"], live_url: "#", github_url: null, image_url: "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=800&q=80" },
+  { id: "p4", title: "Vaultify", category: "Mobile", description: "Personal finance tracker with bank-grade encryption, biometric auth, and a beautiful cross-platform UI.", tech: ["React Native", "Firebase"], live_url: "#", github_url: null, image_url: "https://images.unsplash.com/photo-1563013544-824ae1b704d3?w=800&q=80" },
+  { id: "p5", title: "Pulse Commerce", category: "Web", description: "Headless e-commerce platform achieving 99 Lighthouse score with sub-second loads and 99.9% uptime.", tech: ["Next.js", "Stripe"], live_url: "#", github_url: null, image_url: "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80" },
+  { id: "p6", title: "Lumen API", category: "API", description: "Image generation API serving over 1M+ requests per month with 99.9% uptime and a global CDN.", tech: ["FastAPI", "Docker"], live_url: "#", github_url: null, image_url: "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&q=80" },
 ];
 
 export const fallbackTechStack = [

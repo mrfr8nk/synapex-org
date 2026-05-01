@@ -14,7 +14,6 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — Synapex" }, { name: "robots", content: "noindex" }] }),
   component: AdminPage,
 });
 
@@ -30,6 +29,7 @@ const NAV_ITEMS = [
   { key: "team_members", label: "Team", Icon: Users },
   { key: "pricing_plans", label: "Pricing", Icon: DollarSign },
   { key: "blog_posts", label: "Blog Posts", Icon: BookOpen },
+  { key: "developers", label: "Developers", Icon: FileText },
   { key: "messages", label: "Messages", Icon: Inbox },
   { key: "settings", label: "Site Settings", Icon: Settings },
 ];
@@ -166,6 +166,7 @@ function AdminPage() {
   const [tab, setTab] = useState("overview");
   const [rows, setRows] = useState<any[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
+  const [developers, setDevelopers] = useState<any[]>([]);
   const [stats, setStats] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState<string | null>(null);
@@ -221,11 +222,17 @@ function AdminPage() {
     loadStats();
     supabase.from("contact_messages" as any).select("*").order("created_at", { ascending: false })
       .then(({ data }) => setMessages(data || []));
+    supabase.from("developer_profiles" as any).select("*").order("joined_at", { ascending: false })
+      .then(({ data }) => setDevelopers(data || []));
   }, [logged]);
 
   useEffect(() => {
-    if (!logged || !(tab in TABLE_CONFIG)) return;
-    loadTab(tab);
+    if (!logged) return;
+    if (tab in TABLE_CONFIG) loadTab(tab);
+    if (tab === "developers") {
+      supabase.from("developer_profiles" as any).select("*").order("joined_at", { ascending: false })
+        .then(({ data }) => setDevelopers(data || []));
+    }
   }, [logged, tab]);
 
   async function loadTab(t: string) {
@@ -465,6 +472,7 @@ function AdminPage() {
                 <StatCard label="Testimonials" value={stats.testimonials ?? "—"} Icon={Star} />
                 <StatCard label="Pricing plans" value={stats.pricing_plans ?? "—"} Icon={DollarSign} />
                 <StatCard label="Messages" value={messages.length} Icon={MessageSquare} />
+                <StatCard label="Developers" value={developers.length} Icon={Users} />
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5">
                 <h3 className="text-sm font-medium mb-3">Quick actions</h3>
@@ -581,20 +589,109 @@ function AdminPage() {
                       </div>
 
                       {/* Row actions */}
-                      <div className="flex gap-2 pt-3 border-t border-white/8">
+                      <div className="flex flex-wrap gap-2 pt-3 border-t border-white/8">
                         <button onClick={() => save(row)} disabled={saving === row.id}
                           className="inline-flex items-center gap-1.5 rounded-full bg-white text-black px-5 py-2 text-xs font-medium hover:bg-white/90 transition-colors disabled:opacity-50">
                           {saving === row.id ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
                           {saving === row.id ? "Saving..." : "Save changes"}
                         </button>
+                        {tab === "blog_posts" && row.slug && (
+                          <Link to="/blog/$slug" params={{ slug: row.slug }} target="_blank"
+                            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/50 hover:text-white hover:bg-white/10 transition-colors">
+                            <ExternalLink className="h-3 w-3" /> View post
+                          </Link>
+                        )}
+                        {tab === "projects" && row.live_url && row.live_url !== "#" && (
+                          <a href={row.live_url} target="_blank" rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/50 hover:text-white hover:bg-white/10 transition-colors">
+                            <Globe className="h-3 w-3" /> View live
+                          </a>
+                        )}
                         <button onClick={() => del(row.id)}
-                          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/50 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-colors">
+                          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/50 hover:text-red-400 hover:bg-red-500/10 hover:border-red-500/20 transition-colors ml-auto">
                           <Trash2 className="h-3 w-3" /> Delete
                         </button>
                       </div>
                     </motion.div>
                   ))}
                 </AnimatePresence>
+              )}
+            </div>
+          )}
+
+          {/* DEVELOPERS */}
+          {tab === "developers" && (
+            <div className="space-y-4 max-w-4xl">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <h2 className="text-base font-semibold">Developer network</h2>
+                  <p className="text-xs text-white/40 mt-0.5">{developers.length} registered developer{developers.length !== 1 ? "s" : ""} worldwide</p>
+                </div>
+              </div>
+              {developers.length === 0 ? (
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-16 text-center">
+                  <Users className="h-8 w-8 text-white/20 mx-auto mb-3" />
+                  <p className="text-sm text-white/40">No developers yet</p>
+                  <p className="text-xs text-white/25 mt-1">Developers who sign up via /join will appear here.</p>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 gap-3">
+                  <AnimatePresence>
+                    {developers.map((dev, i) => (
+                      <motion.div key={dev.id}
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: i * 0.03 }}
+                        className="rounded-2xl border border-white/10 bg-white/[0.02] p-5"
+                      >
+                        <div className="flex items-start gap-3">
+                          {dev.avatar_url ? (
+                            <img src={dev.avatar_url} alt="" className="h-10 w-10 rounded-xl object-cover border border-white/10 shrink-0" />
+                          ) : (
+                            <div className="h-10 w-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+                              <span className="text-sm font-semibold text-white/40">{(dev.name || "?")[0].toUpperCase()}</span>
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-sm font-medium truncate">{dev.name || "Unnamed"}</span>
+                              <span className={`rounded-full text-[10px] px-2 py-0.5 border ${
+                                dev.status === "active"
+                                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                                  : "bg-white/5 border-white/10 text-white/30"
+                              }`}>{dev.status || "active"}</span>
+                            </div>
+                            {dev.location && <p className="text-[11px] text-white/35 mt-0.5 flex items-center gap-1"><Globe className="h-2.5 w-2.5" />{dev.location}</p>}
+                            {dev.bio && <p className="text-xs text-white/45 mt-1.5 line-clamp-2 leading-relaxed">{dev.bio}</p>}
+                            {dev.skills && dev.skills.length > 0 && (
+                              <div className="flex flex-wrap gap-1 mt-2">
+                                {dev.skills.slice(0, 4).map((s: string) => (
+                                  <span key={s} className="rounded-full bg-white/5 border border-white/8 text-[10px] text-white/40 px-2 py-0.5">{s}</span>
+                                ))}
+                                {dev.skills.length > 4 && <span className="text-[10px] text-white/25">+{dev.skills.length - 4}</span>}
+                              </div>
+                            )}
+                            <div className="mt-2 flex gap-3">
+                              {dev.github_url && (
+                                <a href={dev.github_url} target="_blank" rel="noopener noreferrer" className="text-[11px] text-white/35 hover:text-white transition-colors flex items-center gap-1">
+                                  <ExternalLink className="h-2.5 w-2.5" /> GitHub
+                                </a>
+                              )}
+                              {dev.portfolio_url && (
+                                <a href={dev.portfolio_url} target="_blank" rel="noopener noreferrer" className="text-[11px] text-white/35 hover:text-white transition-colors flex items-center gap-1">
+                                  <ExternalLink className="h-2.5 w-2.5" /> Portfolio
+                                </a>
+                              )}
+                              <span className="text-[11px] text-white/20 ml-auto">
+                                {dev.joined_at ? new Date(dev.joined_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : ""}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </AnimatePresence>
+                </div>
               )}
             </div>
           )}

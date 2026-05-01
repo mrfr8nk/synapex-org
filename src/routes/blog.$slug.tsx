@@ -1,9 +1,10 @@
 import { createFileRoute, Link, useParams } from "@tanstack/react-router";
 import { SiteLayout } from "@/components/SiteLayout";
 import { motion } from "framer-motion";
-import { ArrowLeft, Calendar, User, Tag } from "lucide-react";
+import { ArrowLeft, Calendar, User, Tag, Twitter, Linkedin, Link2, Check } from "lucide-react";
 import { FadeIn } from "@/components/FadeIn";
 import { useBlogPost } from "@/lib/useContent";
+import { useState } from "react";
 
 export const Route = createFileRoute("/blog/$slug")({
   component: BlogPostPage,
@@ -32,6 +33,49 @@ function renderContent(content: string) {
     }
     return <p key={i} className="text-white/70 leading-relaxed">{line}</p>;
   });
+}
+
+function ShareButtons({ title }: { title: string }) {
+  const [copied, setCopied] = useState(false);
+  const url = window.location.href;
+  const text = encodeURIComponent(title);
+  const encodedUrl = encodeURIComponent(url);
+
+  const copy = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <span className="text-[11px] uppercase tracking-[0.15em] text-white/30 mr-1">Share</span>
+      <a
+        href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${text}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 rounded-full glass border border-white/10 px-3.5 py-2 text-xs text-white/60 hover:text-white hover:border-white/25 transition-all"
+      >
+        <Twitter className="h-3.5 w-3.5" /> Twitter
+      </a>
+      <a
+        href={`https://linkedin.com/sharing/share-offsite/?url=${encodedUrl}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1.5 rounded-full glass border border-white/10 px-3.5 py-2 text-xs text-white/60 hover:text-white hover:border-white/25 transition-all"
+      >
+        <Linkedin className="h-3.5 w-3.5" /> LinkedIn
+      </a>
+      <button
+        onClick={copy}
+        className="inline-flex items-center gap-1.5 rounded-full glass border border-white/10 px-3.5 py-2 text-xs text-white/60 hover:text-white hover:border-white/25 transition-all"
+      >
+        {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Link2 className="h-3.5 w-3.5" />}
+        {copied ? "Copied!" : "Copy link"}
+      </button>
+    </div>
+  );
 }
 
 function BlogPostPage() {
@@ -126,14 +170,19 @@ function BlogPostPage() {
           </FadeIn>
 
           <FadeIn direction="up" delay={0.2}>
-            <div className="mt-16 pt-8 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div>
-                <p className="text-sm text-white/50">Written by</p>
-                <p className="font-semibold">{post.author || "Synapex Team"}</p>
+            <div className="mt-16 pt-8 border-t border-white/10 space-y-6">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <p className="text-sm text-white/50">Written by</p>
+                  <p className="font-semibold">{post.author || "Synapex Team"}</p>
+                </div>
+                <Link to="/blog" className="inline-flex items-center gap-2 rounded-full glass px-5 py-2.5 text-sm hover:bg-white/10 transition-colors">
+                  <ArrowLeft className="h-4 w-4" /> More articles
+                </Link>
               </div>
-              <Link to="/blog" className="inline-flex items-center gap-2 rounded-full glass px-5 py-2.5 text-sm hover:bg-white/10 transition-colors">
-                <ArrowLeft className="h-4 w-4" /> More articles
-              </Link>
+              <div className="rounded-2xl border border-white/8 bg-white/[0.02] p-5">
+                <ShareButtons title={post.title} />
+              </div>
             </div>
           </FadeIn>
         </div>

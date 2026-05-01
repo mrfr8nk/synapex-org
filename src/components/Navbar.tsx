@@ -16,6 +16,8 @@ const moreLinks = [
   { to: "/team", label: "Team" },
   { to: "/faq", label: "FAQ" },
   { to: "/careers", label: "Careers" },
+  { to: "/join", label: "Join as Developer" },
+  { to: "/sponsors", label: "Sponsors" },
 ] as const;
 
 export function Navbar() {

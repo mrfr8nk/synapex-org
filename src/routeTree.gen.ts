@@ -10,10 +10,13 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TeamRouteImport } from './routes/team'
+import { Route as SponsorsRouteImport } from './routes/sponsors'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as JoinRouteImport } from './routes/join'
 import { Route as FaqRouteImport } from './routes/faq'
+import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as CareersRouteImport } from './routes/careers'
 import { Route as BlogRouteImport } from './routes/blog'
@@ -25,6 +28,11 @@ import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
   path: '/team',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SponsorsRoute = SponsorsRouteImport.update({
+  id: '/sponsors',
+  path: '/sponsors',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ServicesRoute = ServicesRouteImport.update({
@@ -42,9 +50,19 @@ const PricingRoute = PricingRouteImport.update({
   path: '/pricing',
   getParentRoute: () => rootRouteImport,
 } as any)
+const JoinRoute = JoinRouteImport.update({
+  id: '/join',
+  path: '/join',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const FaqRoute = FaqRouteImport.update({
   id: '/faq',
   path: '/faq',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardRoute = DashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -90,10 +108,13 @@ export interface FileRoutesByFullPath {
   '/blog': typeof BlogRouteWithChildren
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/faq': typeof FaqRoute
+  '/join': typeof JoinRoute
   '/pricing': typeof PricingRoute
   '/projects': typeof ProjectsRoute
   '/services': typeof ServicesRoute
+  '/sponsors': typeof SponsorsRoute
   '/team': typeof TeamRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
@@ -104,10 +125,13 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogRouteWithChildren
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/faq': typeof FaqRoute
+  '/join': typeof JoinRoute
   '/pricing': typeof PricingRoute
   '/projects': typeof ProjectsRoute
   '/services': typeof ServicesRoute
+  '/sponsors': typeof SponsorsRoute
   '/team': typeof TeamRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
@@ -119,10 +143,13 @@ export interface FileRoutesById {
   '/blog': typeof BlogRouteWithChildren
   '/careers': typeof CareersRoute
   '/contact': typeof ContactRoute
+  '/dashboard': typeof DashboardRoute
   '/faq': typeof FaqRoute
+  '/join': typeof JoinRoute
   '/pricing': typeof PricingRoute
   '/projects': typeof ProjectsRoute
   '/services': typeof ServicesRoute
+  '/sponsors': typeof SponsorsRoute
   '/team': typeof TeamRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
@@ -135,10 +162,13 @@ export interface FileRouteTypes {
     | '/blog'
     | '/careers'
     | '/contact'
+    | '/dashboard'
     | '/faq'
+    | '/join'
     | '/pricing'
     | '/projects'
     | '/services'
+    | '/sponsors'
     | '/team'
     | '/blog/$slug'
   fileRoutesByTo: FileRoutesByTo
@@ -149,10 +179,13 @@ export interface FileRouteTypes {
     | '/blog'
     | '/careers'
     | '/contact'
+    | '/dashboard'
     | '/faq'
+    | '/join'
     | '/pricing'
     | '/projects'
     | '/services'
+    | '/sponsors'
     | '/team'
     | '/blog/$slug'
   id:
@@ -163,10 +196,13 @@ export interface FileRouteTypes {
     | '/blog'
     | '/careers'
     | '/contact'
+    | '/dashboard'
     | '/faq'
+    | '/join'
     | '/pricing'
     | '/projects'
     | '/services'
+    | '/sponsors'
     | '/team'
     | '/blog/$slug'
   fileRoutesById: FileRoutesById
@@ -178,10 +214,13 @@ export interface RootRouteChildren {
   BlogRoute: typeof BlogRouteWithChildren
   CareersRoute: typeof CareersRoute
   ContactRoute: typeof ContactRoute
+  DashboardRoute: typeof DashboardRoute
   FaqRoute: typeof FaqRoute
+  JoinRoute: typeof JoinRoute
   PricingRoute: typeof PricingRoute
   ProjectsRoute: typeof ProjectsRoute
   ServicesRoute: typeof ServicesRoute
+  SponsorsRoute: typeof SponsorsRoute
   TeamRoute: typeof TeamRoute
 }
 
@@ -192,6 +231,13 @@ declare module '@tanstack/react-router' {
       path: '/team'
       fullPath: '/team'
       preLoaderRoute: typeof TeamRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sponsors': {
+      id: '/sponsors'
+      path: '/sponsors'
+      fullPath: '/sponsors'
+      preLoaderRoute: typeof SponsorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/services': {
@@ -215,11 +261,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PricingRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/join': {
+      id: '/join'
+      path: '/join'
+      fullPath: '/join'
+      preLoaderRoute: typeof JoinRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/faq': {
       id: '/faq'
       path: '/faq'
       fullPath: '/faq'
       preLoaderRoute: typeof FaqRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -291,10 +351,13 @@ const rootRouteChildren: RootRouteChildren = {
   BlogRoute: BlogRouteWithChildren,
   CareersRoute: CareersRoute,
   ContactRoute: ContactRoute,
+  DashboardRoute: DashboardRoute,
   FaqRoute: FaqRoute,
+  JoinRoute: JoinRoute,
   PricingRoute: PricingRoute,
   ProjectsRoute: ProjectsRoute,
   ServicesRoute: ServicesRoute,
+  SponsorsRoute: SponsorsRoute,
   TeamRoute: TeamRoute,
 }
 export const routeTree = rootRouteImport
