@@ -120,8 +120,9 @@ function JoinPage() {
     setMagicSending(true);
     setMagicError(null);
     try {
-      const { error } = await supabase.functions.invoke("send-magic-link", {
-        body: { email: magicEmail, origin: window.location.origin },
+      const { error } = await supabase.auth.signInWithOtp({
+        email: magicEmail,
+        options: { emailRedirectTo: `${window.location.origin}/join` },
       });
       if (error) throw error;
       setMagicSent(true);
