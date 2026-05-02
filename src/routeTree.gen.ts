@@ -24,8 +24,6 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
-import { Route as ApiPublicMagicLinkVerifyRouteImport } from './routes/api/public/magic-link.verify'
-import { Route as ApiPublicMagicLinkSendRouteImport } from './routes/api/public/magic-link.send'
 
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
@@ -102,17 +100,6 @@ const BlogSlugRoute = BlogSlugRouteImport.update({
   path: '/$slug',
   getParentRoute: () => BlogRoute,
 } as any)
-const ApiPublicMagicLinkVerifyRoute =
-  ApiPublicMagicLinkVerifyRouteImport.update({
-    id: '/api/public/magic-link/verify',
-    path: '/api/public/magic-link/verify',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPublicMagicLinkSendRoute = ApiPublicMagicLinkSendRouteImport.update({
-  id: '/api/public/magic-link/send',
-  path: '/api/public/magic-link/send',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -130,8 +117,6 @@ export interface FileRoutesByFullPath {
   '/sponsors': typeof SponsorsRoute
   '/team': typeof TeamRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/api/public/magic-link/send': typeof ApiPublicMagicLinkSendRoute
-  '/api/public/magic-link/verify': typeof ApiPublicMagicLinkVerifyRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -149,8 +134,6 @@ export interface FileRoutesByTo {
   '/sponsors': typeof SponsorsRoute
   '/team': typeof TeamRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/api/public/magic-link/send': typeof ApiPublicMagicLinkSendRoute
-  '/api/public/magic-link/verify': typeof ApiPublicMagicLinkVerifyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -169,8 +152,6 @@ export interface FileRoutesById {
   '/sponsors': typeof SponsorsRoute
   '/team': typeof TeamRoute
   '/blog/$slug': typeof BlogSlugRoute
-  '/api/public/magic-link/send': typeof ApiPublicMagicLinkSendRoute
-  '/api/public/magic-link/verify': typeof ApiPublicMagicLinkVerifyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -190,8 +171,6 @@ export interface FileRouteTypes {
     | '/sponsors'
     | '/team'
     | '/blog/$slug'
-    | '/api/public/magic-link/send'
-    | '/api/public/magic-link/verify'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -209,8 +188,6 @@ export interface FileRouteTypes {
     | '/sponsors'
     | '/team'
     | '/blog/$slug'
-    | '/api/public/magic-link/send'
-    | '/api/public/magic-link/verify'
   id:
     | '__root__'
     | '/'
@@ -228,8 +205,6 @@ export interface FileRouteTypes {
     | '/sponsors'
     | '/team'
     | '/blog/$slug'
-    | '/api/public/magic-link/send'
-    | '/api/public/magic-link/verify'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -247,8 +222,6 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRoute
   SponsorsRoute: typeof SponsorsRoute
   TeamRoute: typeof TeamRoute
-  ApiPublicMagicLinkSendRoute: typeof ApiPublicMagicLinkSendRoute
-  ApiPublicMagicLinkVerifyRoute: typeof ApiPublicMagicLinkVerifyRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -358,20 +331,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof BlogRoute
     }
-    '/api/public/magic-link/verify': {
-      id: '/api/public/magic-link/verify'
-      path: '/api/public/magic-link/verify'
-      fullPath: '/api/public/magic-link/verify'
-      preLoaderRoute: typeof ApiPublicMagicLinkVerifyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/public/magic-link/send': {
-      id: '/api/public/magic-link/send'
-      path: '/api/public/magic-link/send'
-      fullPath: '/api/public/magic-link/send'
-      preLoaderRoute: typeof ApiPublicMagicLinkSendRouteImport
-      parentRoute: typeof rootRouteImport
-    }
   }
 }
 
@@ -400,8 +359,6 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRoute,
   SponsorsRoute: SponsorsRoute,
   TeamRoute: TeamRoute,
-  ApiPublicMagicLinkSendRoute: ApiPublicMagicLinkSendRoute,
-  ApiPublicMagicLinkVerifyRoute: ApiPublicMagicLinkVerifyRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
