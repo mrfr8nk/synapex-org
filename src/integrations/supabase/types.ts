@@ -164,6 +164,96 @@ export type Database = {
         }
         Relationships: []
       }
+      events: {
+        Row: {
+          body: string | null
+          created_at: string
+          event_date: string | null
+          id: string
+          image_url: string | null
+          link_url: string | null
+          sort_order: number
+          summary: string | null
+          title: string
+          type: string
+          visible: boolean
+        }
+        Insert: {
+          body?: string | null
+          created_at?: string
+          event_date?: string | null
+          id?: string
+          image_url?: string | null
+          link_url?: string | null
+          sort_order?: number
+          summary?: string | null
+          title: string
+          type?: string
+          visible?: boolean
+        }
+        Update: {
+          body?: string | null
+          created_at?: string
+          event_date?: string | null
+          id?: string
+          image_url?: string | null
+          link_url?: string | null
+          sort_order?: number
+          summary?: string | null
+          title?: string
+          type?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
+      hidden_fallbacks: {
+        Row: {
+          created_at: string
+          fallback_id: string
+          id: string
+          section: string
+        }
+        Insert: {
+          created_at?: string
+          fallback_id: string
+          id?: string
+          section: string
+        }
+        Update: {
+          created_at?: string
+          fallback_id?: string
+          id?: string
+          section?: string
+        }
+        Relationships: []
+      }
+      magic_link_tokens: {
+        Row: {
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          token_hash: string
+          used: boolean
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          token_hash: string
+          used?: boolean
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          token_hash?: string
+          used?: boolean
+        }
+        Relationships: []
+      }
       pricing_plans: {
         Row: {
           created_at: string
@@ -290,6 +380,75 @@ export type Database = {
           key?: string
           updated_at?: string
           value?: Json
+        }
+        Relationships: []
+      }
+      sponsor_applications: {
+        Row: {
+          amount: string | null
+          company: string | null
+          created_at: string
+          email: string
+          id: string
+          message: string | null
+          name: string
+          read: boolean
+        }
+        Insert: {
+          amount?: string | null
+          company?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          message?: string | null
+          name: string
+          read?: boolean
+        }
+        Update: {
+          amount?: string | null
+          company?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string | null
+          name?: string
+          read?: boolean
+        }
+        Relationships: []
+      }
+      sponsors: {
+        Row: {
+          created_at: string
+          id: string
+          logo_url: string | null
+          message: string | null
+          name: string
+          sort_order: number
+          tier: string | null
+          visible: boolean
+          website_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          message?: string | null
+          name: string
+          sort_order?: number
+          tier?: string | null
+          visible?: boolean
+          website_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          message?: string | null
+          name?: string
+          sort_order?: number
+          tier?: string | null
+          visible?: boolean
+          website_url?: string | null
         }
         Relationships: []
       }
