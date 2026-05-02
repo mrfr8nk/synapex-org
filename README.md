@@ -1,6 +1,8 @@
 # Synapex Developers — Official Website
 
-Premium marketing and portfolio website for **Synapex Developers**, a software engineering studio based in Harare, Zimbabwe, building for the world.
+Premium marketing, portfolio and community website for **Synapex Developers**, a software engineering studio based in Harare, Zimbabwe, building for the world.
+
+Live at **[synapex.co.zw](https://synapex.co.zw)** and **[synapex.gleeze.com](https://synapex.gleeze.com)**
 
 ---
 
@@ -9,103 +11,184 @@ Premium marketing and portfolio website for **Synapex Developers**, a software e
 | Layer | Technology |
 |---|---|
 | Framework | React 19 + [Vite](https://vitejs.dev) 7 (SPA) |
-| Routing | [TanStack Router](https://tanstack.com/router) (client-side, file-based) |
-| Styling | Tailwind CSS v4, custom glass/star/grid utility classes |
+| Routing | [TanStack Router](https://tanstack.com/router) (file-based, client-side) |
+| Styling | Tailwind CSS v4 + custom glass/star/grid utilities |
 | Animations | [Framer Motion](https://www.framer.com/motion/) v12 |
-| Icons | [Lucide React](https://lucide.dev), [Simple Icons CDN](https://simpleicons.org) |
+| Icons | [Lucide React](https://lucide.dev) |
+| Backend / DB | [Supabase](https://supabase.com) — Postgres + Auth + Storage |
+| Auth | Google OAuth, GitHub OAuth, SMTP magic-link (denomailer) |
 | Runtime | [Bun](https://bun.sh) |
-| CMS / Database | [Supabase](https://supabase.com) (optional — graceful fallback) |
-| Deployment | Render Static Site, Vercel, Cloudflare Pages, Replit |
+| Deployment | Render Static Site / Vercel / Cloudflare Pages |
 
 ---
 
-## Features
+## Pages
 
-### Pages
-- **Home** `/` — Hero, Stats counter, Services, Clients, Why Us, Tech stack marquee, Process, Projects, Blog preview, Testimonials, Newsletter, CTA
-- **About** `/about` — Company story, values, team preview
-- **Services** `/services` — Full service listing with icons
-- **Work** `/projects` — Portfolio grid with category gradients and tech icons
-- **Pricing** `/pricing` — Tiered pricing plans with feature lists
-- **Team** `/team` — Expanded team section with specialties
-- **Blog** `/blog` — Article listing with category filters
-- **Blog Post** `/blog/$slug` — Individual post with markdown-style content rendering
-- **FAQ** `/faq` — Animated accordion Q&A
-- **Careers** `/careers` — Open positions with location, type, salary
-- **Contact** `/contact` — Contact form (writes to Supabase or logs fallback)
-- **Admin** `/admin` — Password-protected CMS (see below)
-
-### Design System
-- Pure black background with subtle star field and grid overlay
-- Glass morphism cards (`glass`, `glass-strong`, `glass-nav` utilities)
-- Animated gradient text (`text-fade`) on all headings
-- Scroll-triggered reveal animations (left/right/up alternating by section)
-- Dual-row marquee for tech stack icons (both directions)
-- Animated stats counter (counts up on scroll into view)
-- Responsive navbar with "More" dropdown for secondary links
-- Mobile-first — fully responsive at all breakpoints
-
-### Admin CMS (`/admin`)
-Demo Credentials: `mrfrankofc` / `1234`
-
-Manage all site content when Supabase is connected:
-- Services, Projects, Tech Stack, Clients
-- Testimonials, Team Members, Pricing Plans
-- Blog Posts — write/edit/publish articles with markdown-style content
-- **Visibility toggles** — show/hide any row from the live site
-- **Image uploads** — upload directly to Supabase Storage
-- **Messages inbox** — view/mark-read/reply to contact form submissions
-- **Site Settings** — social links, footer text
-
-When Supabase is not configured, the site renders high-quality fallback content automatically — no blank pages.
+| Route | Description |
+|---|---|
+| `/` | Home — Hero, Stats, Events feed, Services, Clients, Why Us, Tech stack, Process, Projects, Blog, Testimonials, Sponsors, Newsletter, CTA |
+| `/about` | Company story, values, team preview |
+| `/services` | Full service listing |
+| `/projects` | Portfolio grid with category gradients & tech chips |
+| `/pricing` | Tiered pricing plans |
+| `/team` | Core team cards + developer network grid (OAuth avatars) |
+| `/blog` | Article listing with category filters |
+| `/blog/$slug` | Individual post with markdown-style rendering |
+| `/sponsors` | Sponsor tiers + application form (saves to Supabase) |
+| `/faq` | Animated accordion Q&A |
+| `/careers` | Open positions |
+| `/contact` | Contact form (writes to `contact_messages`) |
+| `/join` | Developer network signup — Google OAuth, GitHub OAuth, SMTP magic-link |
+| `/dashboard` | Developer profile dashboard (post-auth) |
+| `/admin` | Full CMS — see below |
 
 ---
 
-## Getting Started
+## Admin CMS (`/admin`)
 
-### Prerequisites
-- [Bun](https://bun.sh) >= 1.0
+**Default credentials:** `mrfrankofc` / `1234`
 
-### Install & run locally
+Fully password-protected CMS panel. All changes write to Supabase in real time.
+
+| Tab | What you can manage |
+|---|---|
+| **Overview** | Live stats for all tables |
+| **Events & News** | Post updates, events, news, announcements, achievements |
+| **Services** | Add / edit / reorder / toggle visibility |
+| **Projects** | Portfolio items with image upload, tech tags, live/GitHub URLs |
+| **Tech Stack** | Icons with categories |
+| **Clients** | Client logos (upload or URL) |
+| **Testimonials** | Name, role, quote, star rating, avatar |
+| **Team** | Team member cards with socials |
+| **Pricing** | Plan tiers with feature lists |
+| **Blog Posts** | Write / edit / publish articles; View post link |
+| **Sponsors** | Add sponsors + view / reply to inbound applications |
+| **Developers** | Read-only view of the developer network with skills & socials |
+| **Newsletter** | View all subscribers; one-click CSV export |
+| **Messages** | Inbox for contact form submissions, mark-read, reply via email |
+| **Site Settings** | Social links, footer tagline, contact info |
+
+All image fields support **URL paste or direct upload** to Supabase Storage (`images` bucket). Any item can be shown/hidden with the visibility toggle without deleting it.
+
+When Supabase is not configured the site renders high-quality fallback content automatically — no blank pages, no errors.
+
+---
+
+## Auth — Developer Network
+
+Users can sign up / log in via `/join` using:
+
+- **Google OAuth** — avatar auto-populated from Google account
+- **GitHub OAuth** — avatar auto-populated from GitHub account
+- **SMTP magic-link** — email + one-time link via denomailer (edge function)
+
+After auth, a `developer_profiles` row is created automatically. Developers appear on the `/team` page and in the admin **Developers** tab.
+
+---
+
+## Quick Start
+
 ```bash
 bun install
 bun run dev
 ```
 
-App runs on **http://localhost:5173** (Vite default port).
+App runs on **http://localhost:5000**.
 
 ---
 
-## Supabase Setup (Optional)
+## Supabase Setup
 
-The site works without Supabase — it uses fallback content. To enable the CMS:
+### 1. Create a project
 
-1. Create a project at [supabase.com](https://supabase.com)
-2. Add environment variables:
-   ```
-   VITE_SUPABASE_URL=https://your-project.supabase.co
-   VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
-   ```
-3. Run the migrations in `supabase/migrations/` against your project.
+Go to [supabase.com](https://supabase.com), create a project, then grab:
 
-### Required tables
-- `services` — title, description, icon, sort_order, visible
-- `projects` — title, category, description, image_url, tech[], live_url, github_url, sort_order, visible
-- `tech_stack` — name, category, sort_order, visible
-- `clients` — name, logo_url, website_url, sort_order, visible
-- `testimonials` — name, role, quote, rating, avatar_url, sort_order, visible
-- `team_members` — name, role, bio, image_url, twitter_url, linkedin_url, github_url, sort_order, visible
-- `pricing_plans` — name, price, description, features[], is_popular, sort_order, visible
-- `blog_posts` — title, slug, summary, content, author, category, image_url, published, created_at, visible
-- `contact_messages` — name, email, phone, subject, message, created_at, read
-- `site_content` — key, value (for social links & footer text)
+- **Project URL** → `VITE_SUPABASE_URL`
+- **Anon / public key** → `VITE_SUPABASE_PUBLISHABLE_KEY`
 
-### Supabase Storage (for image uploads in admin)
-1. In your Supabase dashboard → **Storage** → Create a bucket named exactly `images`
-2. Set the bucket to **Public**
-3. Add a policy to allow uploads (anon or authenticated, as needed)
+Add both as environment variables (Replit Secrets or `.env` file):
 
-Then in the admin at `/admin`, image fields will show an **Upload** button alongside the URL input.
+```
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_PUBLISHABLE_KEY=your-anon-key
+```
+
+### 2. Run the setup SQL
+
+Open your Supabase project → **SQL Editor** → paste and run the entire contents of:
+
+```
+SYNAPEX_SUPABASE_SETUP.sql
+```
+
+This single file creates every table, adds all missing columns, enables RLS, and sets all policies. It is **safe to re-run** — every statement uses `IF NOT EXISTS` or `DO $$ BEGIN … END $$` blocks.
+
+### 3. Create the images storage bucket
+
+In your Supabase dashboard:
+
+1. Go to **Storage** → **New bucket**
+2. Name it exactly **`images`**
+3. Set it to **Public**
+
+The SQL file adds the storage policies automatically (step 12 in the file).
+
+### 4. Enable OAuth providers (optional)
+
+In **Authentication → Providers**:
+
+| Provider | What to configure |
+|---|---|
+| **Google** | Enable → add Google Client ID & Secret from [console.cloud.google.com](https://console.cloud.google.com) |
+| **GitHub** | Enable → add GitHub Client ID & Secret from [github.com/settings/developers](https://github.com/settings/developers) |
+
+Add your domains to **Authentication → URL Configuration → Redirect URLs**:
+```
+https://synapex.co.zw/**
+https://synapex.gleeze.com/**
+http://localhost:5000/**
+```
+
+### 5. SMTP magic-link (optional)
+
+Deploy the two edge functions in `supabase/functions/`:
+
+- `send-magic-link` — sends the one-time link via denomailer
+- `verify-magic-link` — validates the token and signs the user in
+
+Set these secrets in **Project Settings → Edge Functions → Secrets**:
+
+```
+SMTP_HOST=smtp.yourprovider.com
+SMTP_PORT=587
+SMTP_USER=your@email.com
+SMTP_PASS=yourpassword
+SMTP_FROM=no-reply@synapex.co.zw
+```
+
+---
+
+## Database Tables
+
+| Table | Purpose |
+|---|---|
+| `site_content` | Key-value store for social links, footer text, contact info |
+| `services` | Agency service offerings |
+| `projects` | Portfolio projects |
+| `tech_stack` | Technology icons & categories |
+| `clients` | Client logos & links |
+| `testimonials` | Client testimonials |
+| `team_members` | Core team profiles |
+| `pricing_plans` | Pricing tier definitions |
+| `blog_posts` | Articles (title, slug, content, published flag) |
+| `contact_messages` | Inbound contact form submissions |
+| `developer_profiles` | Auth-linked developer network profiles |
+| `events` | Events, news, updates, announcements |
+| `sponsors` | Current sponsors displayed on site |
+| `sponsor_applications` | Inbound sponsorship applications |
+| `newsletter_subscribers` | Email subscribers (upsert-safe) |
+| `hidden_fallbacks` | Admin-hidden built-in fallback items |
+| `magic_link_tokens` | SMTP auth one-time tokens |
 
 ---
 
@@ -113,18 +196,21 @@ Then in the admin at `/admin`, image fields will show an **Upload** button along
 
 ```
 src/
-├── routes/               # TanStack Router pages (file-based)
-│   ├── index.tsx         # Home page
-│   ├── blog.tsx          # Blog listing
-│   ├── blog.$slug.tsx    # Individual blog post
-│   ├── faq.tsx           # FAQ accordion
-│   ├── careers.tsx       # Open positions
-│   ├── admin.tsx         # CMS admin portal
+├── routes/
+│   ├── index.tsx            # Home
+│   ├── team.tsx             # Core team + developer network
+│   ├── sponsors.tsx         # Sponsor tiers + application form
+│   ├── join.tsx             # Auth (Google / GitHub / magic-link)
+│   ├── dashboard.tsx        # Developer profile dashboard
+│   ├── blog.tsx             # Blog listing
+│   ├── blog.$slug.tsx       # Individual post
+│   ├── admin.tsx            # Full CMS panel
 │   └── ...
 ├── components/
-│   ├── sections/         # All page sections
+│   ├── sections/
 │   │   ├── Hero.tsx
 │   │   ├── Stats.tsx
+│   │   ├── Events.tsx       # Events & news feed
 │   │   ├── Services.tsx
 │   │   ├── Clients.tsx
 │   │   ├── Technologies.tsx
@@ -133,106 +219,90 @@ src/
 │   │   ├── Projects.tsx
 │   │   ├── Blog.tsx
 │   │   ├── Testimonials.tsx
-│   │   ├── Newsletter.tsx
+│   │   ├── Sponsors.tsx     # Live DB sponsors + tier cards
+│   │   ├── Newsletter.tsx   # Saves to newsletter_subscribers
 │   │   └── CTA.tsx
-│   ├── FadeIn.tsx        # Scroll animation wrapper
-│   ├── Navbar.tsx        # Glass nav with More dropdown
-│   ├── Footer.tsx        # Dynamic footer with social links
-│   └── SiteLayout.tsx    # Page wrapper
+│   ├── ImageInput.tsx       # URL paste + Supabase Storage upload
+│   ├── FadeIn.tsx
+│   ├── Navbar.tsx
+│   ├── Footer.tsx
+│   └── SiteLayout.tsx
 ├── lib/
-│   ├── content.ts        # All fallback data
-│   ├── useContent.ts     # Supabase hooks with fallback
-│   └── admin.ts          # Admin auth helpers
-├── main.tsx              # React app entry point
-├── router.tsx            # TanStack Router config
-└── styles.css            # Tailwind + custom utilities
+│   ├── content.ts           # Fallback data (realistic Zimbabwe/global clients)
+│   ├── useContent.ts        # Supabase hooks with fallback merge
+│   └── admin.ts             # Admin password auth
+├── integrations/supabase/   # Supabase client + types
+└── styles.css               # Tailwind + glass/star/grid utilities
+supabase/
+├── functions/
+│   ├── send-magic-link/     # SMTP magic-link sender (denomailer)
+│   └── verify-magic-link/   # Token verifier + Supabase sign-in
+└── migrations/              # Individual migration history
+SYNAPEX_SUPABASE_SETUP.sql   # ← Single file to run for a fresh DB
 ```
 
 ---
 
-## Brand
+## Design System
 
-- **Primary font**: System UI stack (Inter-style)
-- **Color palette**: Pure black `#000000` with white `#ffffff` at varying opacities
-- **Logo**: `/public/synapex-logo.png` (the S mark)
-- **Tagline**: *African innovation, global standards.*
+- Pure black `#000000` background with animated star field + grid overlay
+- Glassmorphism cards (`glass`, `glass-strong`, `glass-nav` CSS utilities)
+- Animated gradient text (`text-fade`) on headings
+- Scroll-triggered reveal animations (FadeIn component — left/right/up)
+- Dual-row marquee for tech icons (opposing directions)
+- Animated stats counter (counts up on viewport enter)
+- Responsive navbar with "More" dropdown for secondary links
+- Mobile-first — fully responsive at all breakpoints
 
 ---
 
 ## Deployment
 
-This is a **pure static SPA** (no server required). The built output is a `dist/` folder with an `index.html` and assets. All routing is handled client-side by TanStack Router.
+This is a **pure static SPA** — no server required. Build output is `dist/`.
 
-> **Important for deep links & page refreshes:** Static hosts must redirect all paths to `/index.html` (returning HTTP 200) so TanStack Router can handle routing. Configure this rewrite rule on whichever host you use.
+> **SPA routing:** your static host must rewrite all paths to `/index.html` (200 response) so TanStack Router handles navigation. See platform-specific config below.
 
----
+### Render (recommended)
 
-### Deploy on Render (Recommended)
+| Setting | Value |
+|---|---|
+| Build command | `npm install -g bun && bun install && bun run build` |
+| Publish directory | `dist` |
+| Redirect/rewrite | `/* → /index.html` (Rewrite 200) |
 
-1. Push your code to GitHub / GitLab.
-2. Go to [render.com](https://render.com) → **New** → **Static Site**.
-3. Connect your repository.
-4. Fill in the settings:
+### Vercel
 
-   | Setting | Value |
-   |---|---|
-   | **Build Command** | `npm install -g bun && bun install && bun run build` |
-   | **Publish Directory** | `dist` |
-
-5. Under **Redirects/Rewrites**, add a rule:
-
-   | Source | Destination | Action |
-   |---|---|---|
-   | `/*` | `/index.html` | **Rewrite** (200) |
-
-6. Under **Environment Variables**, add these if using Supabase:
-
-   | Variable | Value |
-   |---|---|
-   | `VITE_SUPABASE_URL` | `https://your-project.supabase.co` |
-   | `VITE_SUPABASE_PUBLISHABLE_KEY` | `your-anon-key` |
-
-7. Click **Create Static Site**. Render will build and deploy automatically.
-
----
-
-### Deploy on Vercel
-
-Vercel auto-detects Vite. Just push to GitHub and import the repo on Vercel.
-
-Add a `vercel.json` for SPA routing (deep links):
+Add a `vercel.json`:
 ```json
 {
   "rewrites": [{ "source": "/((?!api/).*)", "destination": "/index.html" }]
 }
 ```
 
----
+### Cloudflare Pages
 
-### Deploy on Cloudflare Pages
+Add `public/_redirects`:
+```
+/* /index.html 200
+```
 
-1. Connect your repo in the Cloudflare Pages dashboard.
-2. Build command: `bun install && bun run build`
-3. Output directory: `dist`
-4. Add a `_redirects` file inside the `public/` folder:
-   ```
-   /* /index.html 200
-   ```
-
----
-
-### Environment Variables Reference
+### Environment variables (all platforms)
 
 | Variable | Required | Description |
 |---|---|---|
-| `VITE_SUPABASE_URL` | No | Your Supabase project URL |
-| `VITE_SUPABASE_PUBLISHABLE_KEY` | No | Your Supabase anon/public key |
+| `VITE_SUPABASE_URL` | No | Supabase project URL |
+| `VITE_SUPABASE_PUBLISHABLE_KEY` | No | Supabase anon key |
 
-Without Supabase vars, the site renders using built-in fallback content — no errors, no blank pages.
+Without Supabase vars the site works with built-in fallback content.
 
 ---
 
-Production URL: [synapex.co.zw](https://synapex.co.zw)
+## Brand
+
+- **Font:** System UI stack (Inter-style)
+- **Palette:** Pure black with white at varying opacities
+- **Logo:** `/public/synapex-logo.png`
+- **Tagline:** *African innovation, global standards.*
 
 ---
 
@@ -240,6 +310,4 @@ Production URL: [synapex.co.zw](https://synapex.co.zw)
 
 Proprietary. All rights reserved — Synapex Developers © 2026.
 
----
-
-*Built In the Brooks of Chitungwiza → shipped to the world.*
+*Built in the brooks of Chitungwiza → shipped to the world.*
