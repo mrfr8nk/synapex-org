@@ -34,6 +34,7 @@ const NAV_ITEMS = [
   { key: "blog_posts", label: "Blog Posts", Icon: BookOpen },
   { key: "sponsors_mgmt", label: "Sponsors", Icon: Heart },
   { key: "developers", label: "Developers", Icon: FileText },
+  { key: "newsletter", label: "Newsletter", Icon: Mail },
   { key: "messages", label: "Messages", Icon: Inbox },
   { key: "settings", label: "Site Settings", Icon: Settings },
 ];
@@ -164,6 +165,65 @@ function StatCard({ label, value, Icon }: { label: string; value: number | strin
   );
 }
 
+function NewsletterTab() {
+  const [subs, setSubs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    supabase
+      .from("newsletter_subscribers" as any)
+      .select("*")
+      .order("subscribed_at", { ascending: false })
+      .then(({ data }) => { setSubs(data || []); setLoading(false); });
+  }, []);
+
+  return (
+    <div className="max-w-2xl space-y-4">
+      <div>
+        <h2 className="text-base font-semibold">Newsletter subscribers</h2>
+        <p className="text-xs text-white/40 mt-0.5">{loading ? "Loading..." : `${subs.length} subscriber${subs.length !== 1 ? "s" : ""}`}</p>
+      </div>
+
+      {!loading && subs.length === 0 ? (
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-16 text-center">
+          <Mail className="h-8 w-8 text-white/20 mx-auto mb-3" />
+          <p className="text-sm text-white/40">No subscribers yet.</p>
+          <p className="text-xs text-white/25 mt-1">People who sign up via the newsletter section will appear here.</p>
+        </div>
+      ) : (
+        <div className="rounded-2xl border border-white/10 bg-white/[0.02] overflow-hidden">
+          <div className="divide-y divide-white/5">
+            {subs.map((s: any) => (
+              <div key={s.id} className="flex items-center justify-between px-5 py-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-7 w-7 rounded-full bg-white/5 border border-white/8 flex items-center justify-center shrink-0 text-[10px] font-bold text-white/30">
+                    {s.email[0].toUpperCase()}
+                  </div>
+                  <span className="text-sm text-white/70">{s.email}</span>
+                </div>
+                <span className="text-[11px] text-white/25 whitespace-nowrap">
+                  {s.subscribed_at ? new Date(s.subscribed_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : ""}
+                </span>
+              </div>
+            ))}
+          </div>
+          {subs.length > 0 && (
+            <div className="px-5 py-3 border-t border-white/5">
+              <a
+                href={`data:text/csv;charset=utf-8,email,subscribed_at\n${subs.map((s) => `${s.email},${s.subscribed_at}`).join("\n")}`}
+                download="newsletter-subscribers.csv"
+                className="inline-flex items-center gap-1.5 text-xs text-white/40 hover:text-white transition-colors"
+              >
+                <Upload className="h-3 w-3" /> Export CSV
+              </a>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function AdminPage() {
   const nav = useNavigate();
   const [logged, setLogged] = useState(false);
@@ -172,6 +232,8 @@ function AdminPage() {
   const [rows, setRows] = useState<any[]>([]);
   const [messages, setMessages] = useState<any[]>([]);
   const [developers, setDevelopers] = useState<any[]>([]);
+  const [sponsors, setSponsors] = useState<any[]>([]);
+  const [sponsorApps, setSponsorApps] = useState<any[]>([]);
   const [stats, setStats] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState<string | null>(null);
@@ -181,6 +243,8 @@ function AdminPage() {
   const siteContent = useSiteContent();
   const [settingsValues, setSettingsValues] = useState<Record<string, string>>({});
   const [settingsSaving, setSettingsSaving] = useState(false);
+  const [newSponsor, setNewSponsor] = useState({ name: "", logo_url: "", website_url: "", tier: "community", description: "" });
+  const [addingSponsor, setAddingSponsor] = useState(false);
 
   const addToast = (type: "success" | "error", message: string) => {
     const id = Date.now();
@@ -238,7 +302,53 @@ function AdminPage() {
       supabase.from("developer_profiles" as any).select("*").order("joined_at", { ascending: false })
         .then(({ data }) => setDevelopers(data || []));
     }
+    if (tab === "sponsors_mgmt") {
+      loadSponsors();
+    }
   }, [logged, tab]);
+
+  async function loadSponsors() {
+    const [sRes, aRes] = await Promise.all([
+      supabase.from("sponsors" as any).select("*").order("sort_order", { ascending: true }),
+      supabase.from("sponsor_applications" as any).select("*").order("created_at", { ascending: false }),
+    ]);
+    setSponsors(sRes.data || []);
+    setSponsorApps(aRes.data || []);
+  }
+
+  async function addSponsor() {
+    if (!newSponsor.name) return;
+    setAddingSponsor(true);
+    const { error } = await supabase.from("sponsors" as any).insert({
+      name: newSponsor.name,
+      logo_url: newSponsor.logo_url || null,
+      website_url: newSponsor.website_url || null,
+      tier: newSponsor.tier,
+      description: newSponsor.description || null,
+      sort_order: sponsors.length,
+      visible: true,
+    });
+    if (error) addToast("error", `Failed: ${error.message}`);
+    else { addToast("success", "Sponsor added"); setNewSponsor({ name: "", logo_url: "", website_url: "", tier: "community", description: "" }); await loadSponsors(); }
+    setAddingSponsor(false);
+  }
+
+  async function deleteSponsor(id: string) {
+    if (!confirm("Delete sponsor?")) return;
+    await supabase.from("sponsors" as any).delete().eq("id", id);
+    addToast("success", "Deleted"); loadSponsors();
+  }
+
+  async function markSponsorAppRead(id: string) {
+    await supabase.from("sponsor_applications" as any).update({ read: true }).eq("id", id);
+    setSponsorApps((prev) => prev.map((a) => a.id === id ? { ...a, read: true } : a));
+  }
+
+  async function deleteSponsorApp(id: string) {
+    if (!confirm("Delete this application?")) return;
+    await supabase.from("sponsor_applications" as any).delete().eq("id", id);
+    setSponsorApps((prev) => prev.filter((a) => a.id !== id));
+  }
 
   async function loadTab(t: string) {
     if (!(t in TABLE_CONFIG)) return;
@@ -280,6 +390,7 @@ function AdminPage() {
       });
       if (tab === "services") blank.icon = "Code2";
       if (tab === "blog_posts") { blank.slug = `post-${Date.now()}`; blank.published = false; blank.author = "Synapex Team"; }
+      if (tab === "events") { blank.title = "New event"; blank.type = "update"; blank.sort_order = rows.length; }
       const { error } = await supabase.from(tab as any).insert(blank);
       if (error) addToast("error", `Add failed: ${error.message}`);
       else { addToast("success", "Added new item"); await loadTab(tab); await loadStats(); }
@@ -574,7 +685,7 @@ function AdminPage() {
                                   <span className="text-sm text-white/60">{f === "published" ? (val ? "Published" : "Draft") : (val ? "Popular" : "Standard")}</span>
                                 </label>
                               ) : isImage ? (
-                                <ImageField value={display} onChange={(v) => { const next = [...rows]; next[idx][f] = v; setRows(next); }} />
+                                <ImageInput value={display} onChange={(v) => { const next = [...rows]; next[idx][f] = v; setRows(next); }} />
                               ) : isContent ? (
                                 <textarea value={display} rows={10}
                                   onChange={(e) => { const next = [...rows]; next[idx][f] = e.target.value; setRows(next); }}
@@ -699,6 +810,142 @@ function AdminPage() {
                 </div>
               )}
             </div>
+          )}
+
+          {/* SPONSORS MANAGEMENT */}
+          {tab === "sponsors_mgmt" && (
+            <div className="space-y-8 max-w-4xl">
+              {/* Current Sponsors */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-base font-semibold">Current sponsors</h2>
+                    <p className="text-xs text-white/40 mt-0.5">{sponsors.length} sponsor{sponsors.length !== 1 ? "s" : ""} displayed on site</p>
+                  </div>
+                </div>
+
+                {/* Add sponsor form */}
+                <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 mb-4 space-y-3">
+                  <h3 className="text-xs uppercase tracking-[0.2em] text-white/40">Add new sponsor</h3>
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[10px] uppercase tracking-wider text-white/35 mb-1.5 block">Name *</label>
+                      <input value={newSponsor.name} onChange={(e) => setNewSponsor((s) => ({ ...s, name: e.target.value }))}
+                        placeholder="Company name" className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors placeholder:text-white/20" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase tracking-wider text-white/35 mb-1.5 block">Tier</label>
+                      <select value={newSponsor.tier} onChange={(e) => setNewSponsor((s) => ({ ...s, tier: e.target.value }))}
+                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors">
+                        <option value="community">Community</option>
+                        <option value="growth">Growth</option>
+                        <option value="enterprise">Enterprise</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase tracking-wider text-white/35 mb-1.5 block">Website URL</label>
+                      <input value={newSponsor.website_url} onChange={(e) => setNewSponsor((s) => ({ ...s, website_url: e.target.value }))}
+                        placeholder="https://company.com" className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors placeholder:text-white/20" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] uppercase tracking-wider text-white/35 mb-1.5 block">Description</label>
+                      <input value={newSponsor.description} onChange={(e) => setNewSponsor((s) => ({ ...s, description: e.target.value }))}
+                        placeholder="Short note (optional)" className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors placeholder:text-white/20" />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="text-[10px] uppercase tracking-wider text-white/35 mb-1.5 block">Logo URL</label>
+                      <ImageInput value={newSponsor.logo_url} onChange={(v) => setNewSponsor((s) => ({ ...s, logo_url: v }))} placeholder="Paste logo URL or upload" />
+                    </div>
+                  </div>
+                  <button onClick={addSponsor} disabled={addingSponsor || !newSponsor.name}
+                    className="inline-flex items-center gap-1.5 rounded-full bg-white text-black px-5 py-2 text-xs font-medium hover:bg-white/90 transition-colors disabled:opacity-50">
+                    {addingSponsor ? <RefreshCw className="h-3.5 w-3.5 animate-spin" /> : <Plus className="h-3.5 w-3.5" />}
+                    Add sponsor
+                  </button>
+                </div>
+
+                {sponsors.length === 0 ? (
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-10 text-center">
+                    <Building2 className="h-7 w-7 text-white/20 mx-auto mb-2" />
+                    <p className="text-sm text-white/40">No sponsors yet — add one above.</p>
+                  </div>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-3">
+                    {sponsors.map((s: any) => (
+                      <motion.div key={s.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                        className="rounded-2xl border border-white/10 bg-white/[0.02] p-4 flex items-center gap-3">
+                        {s.logo_url ? (
+                          <img src={s.logo_url} alt={s.name} className="h-10 w-10 rounded-lg object-contain border border-white/10 shrink-0 bg-white/5" />
+                        ) : (
+                          <div className="h-10 w-10 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0 text-xs font-bold text-white/30">{s.name[0]}</div>
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate">{s.name}</div>
+                          <div className="text-[11px] text-white/35 capitalize">{s.tier}</div>
+                        </div>
+                        <button onClick={() => deleteSponsor(s.id)}
+                          className="text-white/25 hover:text-red-400 transition-colors shrink-0"><Trash2 className="h-3.5 w-3.5" /></button>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Sponsor Applications */}
+              <div>
+                <div className="mb-4">
+                  <h2 className="text-base font-semibold">Sponsorship applications</h2>
+                  <p className="text-xs text-white/40 mt-0.5">{sponsorApps.filter((a) => !a.read).length} unread</p>
+                </div>
+                {sponsorApps.length === 0 ? (
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.02] p-10 text-center">
+                    <Heart className="h-7 w-7 text-white/20 mx-auto mb-2" />
+                    <p className="text-sm text-white/40">No applications yet.</p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {sponsorApps.map((a: any) => (
+                      <motion.div key={a.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                        className={`rounded-2xl border p-5 ${!a.read ? "border-amber-500/20 bg-amber-500/[0.03]" : "border-white/8 bg-white/[0.02]"}`}>
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <div className="text-sm font-medium flex items-center gap-2">
+                              {a.name}
+                              {!a.read && <span className="h-1.5 w-1.5 rounded-full bg-amber-400 shrink-0" />}
+                            </div>
+                            <div className="text-xs text-white/40 mt-0.5">{a.email}{a.company ? ` · ${a.company}` : ""}</div>
+                          </div>
+                          <span className="text-[11px] text-white/25 whitespace-nowrap">{new Date(a.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</span>
+                        </div>
+                        {a.amount && <div className="mt-2 text-xs font-semibold text-emerald-400">Offering: {a.amount}</div>}
+                        {a.message && <p className="mt-2 text-sm text-white/60 leading-relaxed">{a.message}</p>}
+                        <div className="mt-3 flex gap-2 pt-3 border-t border-white/8">
+                          <a href={`mailto:${a.email}?subject=Re: Sponsorship Application`}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-white text-black px-4 py-2 text-xs font-medium hover:bg-white/90 transition-colors">
+                            <Send className="h-3 w-3" /> Reply
+                          </a>
+                          {!a.read && (
+                            <button onClick={() => markSponsorAppRead(a.id)}
+                              className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/50 hover:text-white transition-colors">
+                              <CheckCircle className="h-3 w-3" /> Mark read
+                            </button>
+                          )}
+                          <button onClick={() => deleteSponsorApp(a.id)}
+                            className="ml-auto inline-flex items-center gap-1.5 rounded-full border border-white/8 px-3 py-2 text-xs text-white/30 hover:text-red-400 hover:bg-red-500/10 transition-colors">
+                            <Trash2 className="h-3 w-3" />
+                          </button>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* NEWSLETTER SUBSCRIBERS */}
+          {tab === "newsletter" && (
+            <NewsletterTab />
           )}
 
           {/* MESSAGES */}

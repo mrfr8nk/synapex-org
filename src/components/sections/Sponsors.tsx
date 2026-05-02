@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "@tanstack/react-router";
 import { FadeIn } from "@/components/FadeIn";
 import { Star, Zap, Crown, Heart, ArrowUpRight, Building2, Globe } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 const tiers = [
   {
@@ -55,13 +57,18 @@ const tiers = [
   },
 ];
 
-const currentSponsors = [
-  { name: "Your Company", tier: "Gold", placeholder: true },
-  { name: "Your Brand", tier: "Silver", placeholder: true },
-  { name: "Your Logo", tier: "Bronze", placeholder: true },
-];
-
 export function Sponsors() {
+  const [sponsors, setSponsors] = useState<any[]>([]);
+
+  useEffect(() => {
+    supabase
+      .from("sponsors" as any)
+      .select("*")
+      .eq("visible", true)
+      .order("sort_order", { ascending: true })
+      .then(({ data }) => setSponsors(data || []));
+  }, []);
+
   return (
     <section className="relative py-32 px-6 overflow-hidden">
       <div className="absolute inset-0 stars opacity-20 pointer-events-none" />
@@ -83,21 +90,36 @@ export function Sponsors() {
           </div>
         </FadeIn>
 
-        {/* Current sponsors placeholder */}
+        {/* Current sponsors — live from DB */}
         <FadeIn direction="up" delay={0.05}>
           <div className="mb-14 text-center">
             <p className="text-[10px] uppercase tracking-[0.25em] text-white/25 mb-5">Our sponsors</p>
             <div className="flex flex-wrap items-center justify-center gap-3">
-              {currentSponsors.map((s, i) => (
-                <div
-                  key={i}
-                  className="h-12 px-6 rounded-2xl border border-white/8 bg-white/[0.03] flex items-center justify-center"
-                >
-                  <span className="text-sm text-white/25 font-medium">{s.name}</span>
+              {sponsors.length > 0 ? sponsors.map((s: any) => (
+                s.website_url ? (
+                  <a key={s.id} href={s.website_url} target="_blank" rel="noopener noreferrer"
+                    className="h-12 px-6 rounded-2xl border border-white/10 bg-white/[0.03] flex items-center justify-center gap-2.5 hover:border-white/20 hover:bg-white/[0.06] transition-all group">
+                    {s.logo_url && (
+                      <img src={s.logo_url} alt={s.name} className="h-5 w-5 object-contain rounded" />
+                    )}
+                    <span className="text-sm text-white/50 group-hover:text-white/80 font-medium transition-colors">{s.name}</span>
+                  </a>
+                ) : (
+                  <div key={s.id}
+                    className="h-12 px-6 rounded-2xl border border-white/8 bg-white/[0.03] flex items-center justify-center gap-2.5">
+                    {s.logo_url && (
+                      <img src={s.logo_url} alt={s.name} className="h-5 w-5 object-contain rounded" />
+                    )}
+                    <span className="text-sm text-white/45 font-medium">{s.name}</span>
+                  </div>
+                )
+              )) : (
+                <div className="h-12 px-8 rounded-2xl border border-white/8 bg-white/[0.02] flex items-center justify-center">
+                  <span className="text-sm text-white/20">Be the first sponsor</span>
                 </div>
-              ))}
+              )}
               <Link
-                to="/contact"
+                to="/sponsors"
                 className="h-12 px-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] flex items-center justify-center gap-2 text-sm text-white/30 hover:text-white/60 hover:border-white/25 transition-all"
               >
                 <span>+ Your brand here</span>
@@ -144,7 +166,7 @@ export function Sponsors() {
                 </ul>
 
                 <Link
-                  to="/contact"
+                  to="/sponsors"
                   className="mt-7 inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-2.5 text-sm font-medium hover:bg-white/10 hover:border-white/30 transition-all"
                 >
                   Become a sponsor <ArrowUpRight className="h-3.5 w-3.5" />

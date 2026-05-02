@@ -56,14 +56,18 @@ export const fallbackTechStack = [
 ];
 
 export const fallbackClients = [
-  { id: "c1", name: "Google", logo_url: null, website_url: "https://google.com" },
-  { id: "c2", name: "Microsoft", logo_url: null, website_url: "https://microsoft.com" },
-  { id: "c3", name: "Shopify", logo_url: null, website_url: "https://shopify.com" },
-  { id: "c4", name: "Stripe", logo_url: null, website_url: "https://stripe.com" },
-  { id: "c5", name: "Notion", logo_url: null, website_url: "https://notion.so" },
-  { id: "c6", name: "Vercel", logo_url: null, website_url: "https://vercel.com" },
-  { id: "c7", name: "GitHub", logo_url: null, website_url: "https://github.com" },
-  { id: "c8", name: "Supabase", logo_url: null, website_url: "https://supabase.com" },
+  { id: "c1", name: "Hack Club", logo_url: null, website_url: "https://hackclub.com" },
+  { id: "c2", name: "Replit", logo_url: null, website_url: "https://replit.com" },
+  { id: "c3", name: "Nust Academy", logo_url: null, website_url: "https://nust.ac.zw" },
+  { id: "c4", name: "EduFlow Zim", logo_url: null, website_url: null },
+  { id: "c5", name: "AgriSmart Africa", logo_url: null, website_url: null },
+  { id: "c6", name: "LearnAI Labs", logo_url: null, website_url: null },
+  { id: "c7", name: "Tutor Connect", logo_url: null, website_url: null },
+  { id: "c8", name: "Zim Digital Library", logo_url: null, website_url: null },
+  { id: "c9", name: "BoutiqueOS", logo_url: null, website_url: null },
+  { id: "c10", name: "FarmLink Zim", logo_url: null, website_url: null },
+  { id: "c11", name: "SchoolBridge", logo_url: null, website_url: null },
+  { id: "c12", name: "AgentStack", logo_url: null, website_url: null },
 ];
 
 export const fallbackTestimonials = [

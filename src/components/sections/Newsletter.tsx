@@ -2,18 +2,30 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { FadeIn } from "@/components/FadeIn";
 import { ArrowRight, CheckCircle, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 export function Newsletter() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [errMsg, setErrMsg] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!email || !email.includes("@")) return;
     setStatus("loading");
-    await new Promise((r) => setTimeout(r, 1200));
-    setStatus("success");
-    setEmail("");
+    setErrMsg("");
+    try {
+      const { error } = await supabase.from("newsletter_subscribers" as any).upsert(
+        { email: email.trim().toLowerCase() },
+        { onConflict: "email" }
+      );
+      if (error) throw error;
+      setStatus("success");
+      setEmail("");
+    } catch (e: any) {
+      setErrMsg(e?.message || "Could not subscribe. Please try again.");
+      setStatus("error");
+    }
   }
 
   return (
@@ -43,13 +55,14 @@ export function Newsletter() {
               You're subscribed! Watch your inbox.
             </motion.div>
           ) : (
+            <>
             <form onSubmit={handleSubmit} className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
               <input
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => { setEmail(e.target.value); if (status === "error") setStatus("idle"); }}
                 placeholder="your@email.com"
-                className="flex-1 rounded-full bg-white/5 border border-white/10 px-5 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-colors"
+                className={`flex-1 rounded-full bg-white/5 border px-5 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-colors ${status === "error" ? "border-red-500/50" : "border-white/10"}`}
                 required
               />
               <motion.button
@@ -66,6 +79,10 @@ export function Newsletter() {
                 )}
               </motion.button>
             </form>
+            {status === "error" && (
+              <p className="mt-3 text-xs text-red-400 text-center">{errMsg}</p>
+            )}
+            </>
           )}
           <p className="mt-4 text-[11px] text-white/30">No spam, ever. Unsubscribe anytime.</p>
         </FadeIn>
