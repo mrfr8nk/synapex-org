@@ -96,17 +96,32 @@ CREATE TABLE IF NOT EXISTS public.pricing_plans (
 );
 
 CREATE TABLE IF NOT EXISTS public.blog_posts (
-  id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  title       text        NOT NULL,
-  slug        text        NOT NULL UNIQUE,
-  summary     text,
-  content     text,
-  author      text        NOT NULL DEFAULT 'Synapex Team',
-  category    text,
-  image_url   text,
-  published   boolean     NOT NULL DEFAULT false,
-  visible     boolean     NOT NULL DEFAULT true,
-  created_at  timestamptz NOT NULL DEFAULT now()
+  id                   uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  title                text        NOT NULL,
+  slug                 text        NOT NULL UNIQUE,
+  summary              text,
+  content              text,
+  author               text        NOT NULL DEFAULT 'Synapex Team',
+  category             text,
+  image_url            text,
+  published            boolean     NOT NULL DEFAULT false,
+  pending_approval     boolean     NOT NULL DEFAULT false,
+  submitted_by_user_id uuid        REFERENCES auth.users(id) ON DELETE SET NULL,
+  visible              boolean     NOT NULL DEFAULT true,
+  created_at           timestamptz NOT NULL DEFAULT now()
+);
+
+-- User-submitted blog posts support (also applied via migration 20260502230000)
+ALTER TABLE public.blog_posts ADD COLUMN IF NOT EXISTS pending_approval     boolean NOT NULL DEFAULT false;
+ALTER TABLE public.blog_posts ADD COLUMN IF NOT EXISTS submitted_by_user_id uuid    REFERENCES auth.users(id) ON DELETE SET NULL;
+
+CREATE TABLE IF NOT EXISTS public.project_updates (
+  id             uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  project_id     uuid        NOT NULL REFERENCES public.projects(id) ON DELETE CASCADE,
+  user_id        uuid        NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  developer_name text,
+  content        text        NOT NULL,
+  created_at     timestamptz NOT NULL DEFAULT now()
 );
 
 -- ──────────────────────────────────────────────────────────────

@@ -129,14 +129,13 @@ function JoinPage() {
     setMagicSending(true);
     setMagicError(null);
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: magicEmail,
-        options: { emailRedirectTo: "https://synapex.gleeze.com/join" },
+      const { error } = await supabase.functions.invoke("send-magic-link", {
+        body: { email: magicEmail, origin: window.location.origin },
       });
-      if (error) throw error;
+      if (error) throw new Error(error.message || "Could not send email");
       setMagicSent(true);
     } catch (e: any) {
-      setMagicError(e?.message || "Could not send email");
+      setMagicError(e?.message || "Could not send email. Please try GitHub or Google instead.");
     }
     setMagicSending(false);
   }

@@ -48,7 +48,7 @@ const TABLE_CONFIG: Record<string, { fields: string[]; orderBy: string }> = {
   testimonials: { fields: ["name", "role", "quote", "rating", "avatar_url", "sort_order", "visible"], orderBy: "sort_order" },
   team_members: { fields: ["name", "role", "bio", "image_url", "twitter_url", "linkedin_url", "github_url", "sort_order", "visible"], orderBy: "sort_order" },
   pricing_plans: { fields: ["name", "price", "description", "features", "is_popular", "sort_order", "visible"], orderBy: "sort_order" },
-  blog_posts: { fields: ["title", "slug", "summary", "content", "author", "category", "image_url", "published", "visible"], orderBy: "created_at" },
+  blog_posts: { fields: ["title", "slug", "summary", "content", "author", "category", "image_url", "published", "pending_approval", "visible"], orderBy: "created_at" },
 };
 
 const IMAGE_FIELDS = ["image_url", "logo_url", "avatar_url", "photo_url", "cover_url", "thumbnail_url"];
@@ -778,6 +778,7 @@ function AdminPage() {
                 <StatCard label="Projects" value={stats.projects ?? "—"} Icon={Layers} />
                 <StatCard label="Team members" value={stats.team_members ?? "—"} Icon={Users} />
                 <StatCard label="Blog posts" value={stats.blog_posts ?? "—"} Icon={BookOpen} />
+                <StatCard label="Pending posts" value={rows.filter((r) => r.pending_approval && !r.published).length || "—"} Icon={BookOpen} />
                 <StatCard label="Clients" value={stats.clients ?? "—"} Icon={Globe} />
                 <StatCard label="Testimonials" value={stats.testimonials ?? "—"} Icon={Star} />
                 <StatCard label="Pricing plans" value={stats.pricing_plans ?? "—"} Icon={DollarSign} />
@@ -831,7 +832,8 @@ function AdminPage() {
                           <span className="text-[10px] text-white/25 font-mono">#{idx + 1}</span>
                           <span className="text-sm font-medium text-white/80">{row.title || row.name || row.slug || "Untitled"}</span>
                           {row.published === true && <span className="rounded-full bg-emerald-500/15 border border-emerald-500/25 text-emerald-400 text-[10px] px-2 py-0.5">Published</span>}
-                          {row.published === false && tab === "blog_posts" && <span className="rounded-full bg-white/5 border border-white/10 text-white/30 text-[10px] px-2 py-0.5">Draft</span>}
+                          {row.published === false && row.pending_approval && tab === "blog_posts" && <span className="rounded-full bg-amber-500/15 border border-amber-500/25 text-amber-400 text-[10px] px-2 py-0.5">⏳ Pending review</span>}
+                          {row.published === false && !row.pending_approval && tab === "blog_posts" && <span className="rounded-full bg-white/5 border border-white/10 text-white/30 text-[10px] px-2 py-0.5">Draft</span>}
                           {row.is_popular && <span className="rounded-full bg-blue-500/15 border border-blue-500/25 text-blue-400 text-[10px] px-2 py-0.5">Popular</span>}
                         </div>
                         {/* Visible toggle */}
@@ -919,6 +921,26 @@ function AdminPage() {
                           {saving === row.id ? <RefreshCw className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
                           {saving === row.id ? "Saving..." : "Save changes"}
                         </button>
+                        {tab === "blog_posts" && row.pending_approval && !row.published && (
+                          <button
+                            onClick={async () => {
+                              const { error } = await supabase.from("blog_posts" as any)
+                                .update({ published: true, pending_approval: false, visible: true })
+                                .eq("id", row.id);
+                              if (!error) {
+                                const next = [...rows];
+                                next[idx] = { ...row, published: true, pending_approval: false, visible: true };
+                                setRows(next);
+                                addToast("success", `"${row.title}" approved and published!`);
+                              } else {
+                                addToast("error", "Approve failed: " + error.message);
+                              }
+                            }}
+                            className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 text-white px-4 py-2 text-xs font-medium hover:bg-emerald-400 transition-colors"
+                          >
+                            <CheckCircle className="h-3 w-3" /> Approve &amp; Publish
+                          </button>
+                        )}
                         {tab === "blog_posts" && row.slug && (
                           <Link to="/blog/$slug" params={{ slug: row.slug }} target="_blank"
                             className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/50 hover:text-white hover:bg-white/10 transition-colors">
