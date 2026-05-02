@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      blog_posts: {
+        Row: {
+          author: string | null
+          category: string | null
+          content: string | null
+          created_at: string | null
+          id: number
+          image_url: string | null
+          published: boolean | null
+          slug: string
+          summary: string | null
+          title: string
+          visible: boolean
+        }
+        Insert: {
+          author?: string | null
+          category?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: never
+          image_url?: string | null
+          published?: boolean | null
+          slug: string
+          summary?: string | null
+          title: string
+          visible?: boolean
+        }
+        Update: {
+          author?: string | null
+          category?: string | null
+          content?: string | null
+          created_at?: string | null
+          id?: never
+          image_url?: string | null
+          published?: boolean | null
+          slug?: string
+          summary?: string | null
+          title?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
       clients: {
         Row: {
           created_at: string
@@ -21,6 +63,7 @@ export type Database = {
           logo_url: string | null
           name: string
           sort_order: number
+          visible: boolean
           website_url: string | null
         }
         Insert: {
@@ -29,6 +72,7 @@ export type Database = {
           logo_url?: string | null
           name: string
           sort_order?: number
+          visible?: boolean
           website_url?: string | null
         }
         Update: {
@@ -37,6 +81,7 @@ export type Database = {
           logo_url?: string | null
           name?: string
           sort_order?: number
+          visible?: boolean
           website_url?: string | null
         }
         Relationships: []
@@ -68,6 +113,57 @@ export type Database = {
         }
         Relationships: []
       }
+      developer_profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          github_url: string | null
+          id: string
+          joined_at: string | null
+          last_seen: string | null
+          location: string | null
+          name: string
+          portfolio_url: string | null
+          role: string | null
+          skills: string[] | null
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          github_url?: string | null
+          id?: string
+          joined_at?: string | null
+          last_seen?: string | null
+          location?: string | null
+          name?: string
+          portfolio_url?: string | null
+          role?: string | null
+          skills?: string[] | null
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          github_url?: string | null
+          id?: string
+          joined_at?: string | null
+          last_seen?: string | null
+          location?: string | null
+          name?: string
+          portfolio_url?: string | null
+          role?: string | null
+          skills?: string[] | null
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       pricing_plans: {
         Row: {
           created_at: string
@@ -78,6 +174,7 @@ export type Database = {
           name: string
           price: string
           sort_order: number
+          visible: boolean
         }
         Insert: {
           created_at?: string
@@ -88,6 +185,7 @@ export type Database = {
           name: string
           price: string
           sort_order?: number
+          visible?: boolean
         }
         Update: {
           created_at?: string
@@ -98,6 +196,7 @@ export type Database = {
           name?: string
           price?: string
           sort_order?: number
+          visible?: boolean
         }
         Relationships: []
       }
@@ -113,6 +212,7 @@ export type Database = {
           sort_order: number
           tech: string[]
           title: string
+          visible: boolean
         }
         Insert: {
           category: string
@@ -125,6 +225,7 @@ export type Database = {
           sort_order?: number
           tech?: string[]
           title: string
+          visible?: boolean
         }
         Update: {
           category?: string
@@ -137,6 +238,7 @@ export type Database = {
           sort_order?: number
           tech?: string[]
           title?: string
+          visible?: boolean
         }
         Relationships: []
       }
@@ -148,6 +250,7 @@ export type Database = {
           id: string
           sort_order: number
           title: string
+          visible: boolean
         }
         Insert: {
           created_at?: string
@@ -156,6 +259,7 @@ export type Database = {
           id?: string
           sort_order?: number
           title: string
+          visible?: boolean
         }
         Update: {
           created_at?: string
@@ -164,6 +268,7 @@ export type Database = {
           id?: string
           sort_order?: number
           title?: string
+          visible?: boolean
         }
         Relationships: []
       }
@@ -200,6 +305,7 @@ export type Database = {
           role: string
           sort_order: number
           twitter_url: string | null
+          visible: boolean
         }
         Insert: {
           bio?: string | null
@@ -212,6 +318,7 @@ export type Database = {
           role: string
           sort_order?: number
           twitter_url?: string | null
+          visible?: boolean
         }
         Update: {
           bio?: string | null
@@ -224,6 +331,7 @@ export type Database = {
           role?: string
           sort_order?: number
           twitter_url?: string | null
+          visible?: boolean
         }
         Relationships: []
       }
@@ -234,6 +342,7 @@ export type Database = {
           id: string
           name: string
           sort_order: number
+          visible: boolean
         }
         Insert: {
           category?: string | null
@@ -241,6 +350,7 @@ export type Database = {
           id?: string
           name: string
           sort_order?: number
+          visible?: boolean
         }
         Update: {
           category?: string | null
@@ -248,6 +358,7 @@ export type Database = {
           id?: string
           name?: string
           sort_order?: number
+          visible?: boolean
         }
         Relationships: []
       }
@@ -261,6 +372,7 @@ export type Database = {
           rating: number
           role: string
           sort_order: number
+          visible: boolean
         }
         Insert: {
           avatar_url?: string | null
@@ -271,6 +383,7 @@ export type Database = {
           rating?: number
           role: string
           sort_order?: number
+          visible?: boolean
         }
         Update: {
           avatar_url?: string | null
@@ -281,6 +394,7 @@ export type Database = {
           rating?: number
           role?: string
           sort_order?: number
+          visible?: boolean
         }
         Relationships: []
       }
