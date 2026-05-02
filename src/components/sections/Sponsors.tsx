@@ -118,12 +118,12 @@ export function Sponsors() {
                   <span className="text-sm text-white/20">Be the first sponsor</span>
                 </div>
               )}
-              <Link
-                to="/sponsors"
+              <a
+                href="/sponsors#apply"
                 className="h-12 px-6 rounded-2xl border border-dashed border-white/15 bg-white/[0.02] flex items-center justify-center gap-2 text-sm text-white/30 hover:text-white/60 hover:border-white/25 transition-all"
               >
                 <span>+ Your brand here</span>
-              </Link>
+              </a>
             </div>
           </div>
         </FadeIn>
@@ -165,12 +165,12 @@ export function Sponsors() {
                   ))}
                 </ul>
 
-                <Link
-                  to="/sponsors"
+                <a
+                  href="/sponsors#apply"
                   className="mt-7 inline-flex items-center justify-center gap-2 rounded-full border border-white/20 bg-white/5 px-5 py-2.5 text-sm font-medium hover:bg-white/10 hover:border-white/30 transition-all"
                 >
                   Become a sponsor <ArrowUpRight className="h-3.5 w-3.5" />
-                </Link>
+                </a>
               </motion.div>
             </FadeIn>
           ))}

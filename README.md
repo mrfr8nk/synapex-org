@@ -133,38 +133,84 @@ In your Supabase dashboard:
 
 The SQL file adds the storage policies automatically (step 12 in the file).
 
-### 4. Enable OAuth providers (optional)
+### 4. Enable GitHub OAuth (optional)
 
-In **Authentication → Providers**:
+**Where to go:** [github.com/settings/developers](https://github.com/settings/developers) → **OAuth Apps** → **New OAuth App**
 
-| Provider | What to configure |
+| Field | Value |
 |---|---|
-| **Google** | Enable → add Google Client ID & Secret from [console.cloud.google.com](https://console.cloud.google.com) |
-| **GitHub** | Enable → add GitHub Client ID & Secret from [github.com/settings/developers](https://github.com/settings/developers) |
+| Application name | Synapex Developers |
+| Homepage URL | `https://synapex.co.zw` |
+| Authorization callback URL | `https://<your-project-ref>.supabase.co/auth/v1/callback` |
 
-Add your domains to **Authentication → URL Configuration → Redirect URLs**:
+After saving, GitHub gives you a **Client ID** and lets you generate a **Client secret**.
+
+**In Supabase:** Authentication → Providers → GitHub → Enable → paste **Client ID** and **Client secret** → Save.
+
+---
+
+### 5. Enable Google OAuth (optional)
+
+**Where to go:** [console.cloud.google.com](https://console.cloud.google.com) → APIs & Services → **Credentials** → **Create Credentials** → OAuth client ID
+
+| Field | Value |
+|---|---|
+| Application type | Web application |
+| Authorised JavaScript origins | `https://synapex.co.zw` |
+| Authorised redirect URIs | `https://<your-project-ref>.supabase.co/auth/v1/callback` |
+
+After saving, Google gives you a **Client ID** and **Client secret**.
+
+**In Supabase:** Authentication → Providers → Google → Enable → paste **Client ID** and **Client secret** → Save.
+
+---
+
+### 6. Add redirect URLs (required for both OAuth providers)
+
+In **Supabase → Authentication → URL Configuration → Redirect URLs**, add:
+
 ```
 https://synapex.co.zw/**
 https://synapex.gleeze.com/**
 http://localhost:5000/**
 ```
 
-### 5. SMTP magic-link (optional)
+---
+
+### 7. SMTP magic-link (optional)
 
 Deploy the two edge functions in `supabase/functions/`:
 
 - `send-magic-link` — sends the one-time link via denomailer
 - `verify-magic-link` — validates the token and signs the user in
 
-Set these secrets in **Project Settings → Edge Functions → Secrets**:
+**Quick way to get your secrets:** Open the admin panel (`/admin`) → **Site Settings** → scroll to the **Email magic-link — SMTP secrets helper** section. Enter your email address and app password — the tool auto-detects your provider (Gmail, Outlook, Yahoo, etc.) and generates all 5 secrets ready to copy.
 
-```
-SMTP_HOST=smtp.yourprovider.com
-SMTP_PORT=587
-SMTP_USER=your@email.com
-SMTP_PASS=yourpassword
-SMTP_FROM=no-reply@synapex.co.zw
-```
+**Gmail users:** You must use an **App Password**, not your normal Gmail password.
+1. Go to [myaccount.google.com](https://myaccount.google.com) → Security → 2-Step Verification → App passwords
+2. Create one called "Synapex SMTP"
+3. Copy the 16-character password
+
+Then paste the generated secrets into **Supabase → Project Settings → Edge Functions → Secrets**:
+
+| Secret | Example (Gmail) |
+|---|---|
+| `SMTP_HOST` | `smtp.gmail.com` ← auto-filled |
+| `SMTP_PORT` | `587` ← auto-filled |
+| `SMTP_USER` | `you@gmail.com` |
+| `SMTP_PASS` | your 16-char app password |
+| `SMTP_FROM` | `no-reply@synapex.co.zw` (or same as SMTP_USER) |
+
+**Common provider auto-fills:**
+
+| Email domain | SMTP_HOST | SMTP_PORT |
+|---|---|---|
+| gmail.com | smtp.gmail.com | 587 |
+| outlook.com / hotmail.com | smtp-mail.outlook.com | 587 |
+| yahoo.com | smtp.mail.yahoo.com | 465 |
+| icloud.com / me.com | smtp.mail.me.com | 587 |
+| protonmail.com / proton.me | smtp.protonmail.com | 587 |
+| zoho.com | smtp.zoho.com | 587 |
 
 ---
 

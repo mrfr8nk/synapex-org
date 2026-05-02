@@ -165,6 +165,193 @@ function StatCard({ label, value, Icon }: { label: string; value: number | strin
   );
 }
 
+/* ── SMTP provider presets ─────────────────────────────────── */
+const SMTP_PRESETS: Record<string, { host: string; port: string }> = {
+  "gmail.com":       { host: "smtp.gmail.com",           port: "587" },
+  "googlemail.com":  { host: "smtp.gmail.com",           port: "587" },
+  "outlook.com":     { host: "smtp-mail.outlook.com",    port: "587" },
+  "hotmail.com":     { host: "smtp-mail.outlook.com",    port: "587" },
+  "live.com":        { host: "smtp-mail.outlook.com",    port: "587" },
+  "yahoo.com":       { host: "smtp.mail.yahoo.com",      port: "465" },
+  "yahoo.co.uk":     { host: "smtp.mail.yahoo.com",      port: "465" },
+  "icloud.com":      { host: "smtp.mail.me.com",         port: "587" },
+  "me.com":          { host: "smtp.mail.me.com",         port: "587" },
+  "protonmail.com":  { host: "smtp.protonmail.com",      port: "587" },
+  "proton.me":       { host: "smtp.protonmail.com",      port: "587" },
+  "zoho.com":        { host: "smtp.zoho.com",            port: "587" },
+};
+
+function SettingsTab({
+  settingsValues, setSettingsValues, settingsSaving, saveSettings, supabaseOk,
+}: {
+  settingsValues: Record<string, string>;
+  setSettingsValues: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+  settingsSaving: boolean;
+  saveSettings: () => void;
+  supabaseOk: boolean | null;
+}) {
+  const [smtpEmail, setSmtpEmail] = useState("");
+  const [smtpPass,  setSmtpPass]  = useState("");
+  const [smtpFrom,  setSmtpFrom]  = useState("");
+  const [copiedKey, setCopiedKey] = useState<string | null>(null);
+
+  const domain  = smtpEmail.includes("@") ? smtpEmail.split("@")[1].toLowerCase() : "";
+  const preset  = SMTP_PRESETS[domain] ?? null;
+  const smtpHost = preset?.host ?? (domain ? `smtp.${domain}` : "");
+  const smtpPort = preset?.port ?? "587";
+  const fromAddr = smtpFrom || smtpEmail;
+
+  const secrets: { key: string; label: string; value: string }[] = [
+    { key: "SMTP_HOST", label: "SMTP_HOST", value: smtpHost },
+    { key: "SMTP_PORT", label: "SMTP_PORT", value: smtpPort },
+    { key: "SMTP_USER", label: "SMTP_USER", value: smtpEmail },
+    { key: "SMTP_PASS", label: "SMTP_PASS", value: smtpPass },
+    { key: "SMTP_FROM", label: "SMTP_FROM", value: fromAddr },
+  ];
+
+  function copySecret(key: string, value: string) {
+    navigator.clipboard.writeText(value).then(() => {
+      setCopiedKey(key);
+      setTimeout(() => setCopiedKey(null), 1800);
+    });
+  }
+
+  function copyAll() {
+    const text = secrets.map((s) => `${s.key}=${s.value}`).join("\n");
+    navigator.clipboard.writeText(text).then(() => {
+      setCopiedKey("ALL");
+      setTimeout(() => setCopiedKey(null), 1800);
+    });
+  }
+
+  return (
+    <div className="max-w-2xl space-y-8">
+      <div>
+        <h2 className="text-lg font-semibold tracking-tight">Site Settings</h2>
+        <p className="text-sm text-white/40 mt-1">Changes save to Supabase and appear on your site immediately.</p>
+      </div>
+
+      {SETTINGS_FIELDS.map(({ group, items }) => (
+        <div key={group} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 space-y-4">
+          <h3 className="text-xs uppercase tracking-[0.2em] text-white/40 pb-2 border-b border-white/8">{group}</h3>
+          {items.map(({ key, label, placeholder }) => (
+            <div key={key} className="space-y-1.5">
+              <label className="text-xs text-white/60 font-medium">{label}</label>
+              <input
+                value={settingsValues[key] ?? ""}
+                onChange={(e) => setSettingsValues((prev) => ({ ...prev, [key]: e.target.value }))}
+                placeholder={placeholder}
+                className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors placeholder:text-white/20"
+              />
+            </div>
+          ))}
+        </div>
+      ))}
+
+      <div className="flex items-center gap-3">
+        <button onClick={saveSettings} disabled={settingsSaving || supabaseOk === false}
+          className="inline-flex items-center gap-2 rounded-full bg-white text-black px-6 py-2.5 text-sm font-medium hover:bg-white/90 transition-colors disabled:opacity-50">
+          {settingsSaving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+          {settingsSaving ? "Saving..." : "Save all settings"}
+        </button>
+        {supabaseOk === false && (
+          <p className="text-xs text-amber-400">Connect Supabase first to save settings.</p>
+        )}
+      </div>
+
+      {/* SMTP helper */}
+      <div className="rounded-2xl border border-blue-500/20 bg-blue-500/5 p-5 space-y-5">
+        <div>
+          <h3 className="text-sm font-semibold flex items-center gap-2">
+            <span className="h-5 w-5 rounded-full bg-blue-500/20 border border-blue-500/30 flex items-center justify-center text-blue-400 text-[10px]">✉</span>
+            Email magic-link — SMTP secrets helper
+          </h3>
+          <p className="text-xs text-white/40 mt-1">
+            Enter your email + app password. Secrets are auto-generated — copy them into{" "}
+            <span className="text-white/60">Supabase → Project Settings → Edge Functions → Secrets</span>.
+          </p>
+        </div>
+
+        <div className="grid sm:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <label className="text-[11px] uppercase tracking-wider text-white/40">Your email address</label>
+            <input
+              type="email"
+              value={smtpEmail}
+              onChange={(e) => setSmtpEmail(e.target.value)}
+              placeholder="you@gmail.com"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors placeholder:text-white/20"
+            />
+            {smtpEmail && preset && (
+              <p className="text-[11px] text-emerald-400">
+                ✓ Auto-detected: {preset.host}:{preset.port}
+              </p>
+            )}
+            {smtpEmail && !preset && domain && (
+              <p className="text-[11px] text-white/35">Using: smtp.{domain}:{smtpPort}</p>
+            )}
+          </div>
+          <div className="space-y-1.5">
+            <label className="text-[11px] uppercase tracking-wider text-white/40">App password</label>
+            <input
+              type="password"
+              value={smtpPass}
+              onChange={(e) => setSmtpPass(e.target.value)}
+              placeholder="16-char app password"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors placeholder:text-white/20"
+            />
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <label className="text-[11px] uppercase tracking-wider text-white/40">
+              Sender address <span className="normal-case text-white/25">(optional — defaults to your email above)</span>
+            </label>
+            <input
+              type="email"
+              value={smtpFrom}
+              onChange={(e) => setSmtpFrom(e.target.value)}
+              placeholder="no-reply@synapex.co.zw"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors placeholder:text-white/20"
+            />
+          </div>
+        </div>
+
+        {smtpEmail && smtpPass && (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <p className="text-[11px] uppercase tracking-wider text-white/40">Secrets to paste into Supabase</p>
+              <button
+                onClick={copyAll}
+                className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors"
+              >
+                {copiedKey === "ALL" ? "✓ Copied all" : "Copy all"}
+              </button>
+            </div>
+            <div className="rounded-xl bg-black/40 border border-white/8 overflow-hidden divide-y divide-white/5">
+              {secrets.map((s) => (
+                <div key={s.key} className="flex items-center gap-3 px-4 py-2.5 group">
+                  <span className="text-[11px] text-white/30 w-24 shrink-0 font-mono">{s.label}</span>
+                  <span className="text-xs text-white/70 font-mono flex-1 truncate">
+                    {s.key === "SMTP_PASS" ? "•".repeat(Math.min(s.value.length, 16)) : s.value || <span className="text-white/20 italic">—</span>}
+                  </span>
+                  <button
+                    onClick={() => copySecret(s.key, s.value)}
+                    className="text-[11px] text-white/30 hover:text-white/70 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                  >
+                    {copiedKey === s.key ? "✓" : "Copy"}
+                  </button>
+                </div>
+              ))}
+            </div>
+            <p className="text-[11px] text-white/25 leading-relaxed">
+              Gmail users: generate an <span className="text-white/50">App Password</span> at myaccount.google.com → Security → 2-Step Verification → App passwords. Do not use your regular Gmail password.
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function NewsletterTab() {
   const [subs, setSubs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -1018,38 +1205,13 @@ function AdminPage() {
 
           {/* SETTINGS */}
           {tab === "settings" && (
-            <div className="max-w-2xl space-y-8">
-              <div>
-                <h2 className="text-lg font-semibold tracking-tight">Site Settings</h2>
-                <p className="text-sm text-white/40 mt-1">Changes save to Supabase and appear on your site immediately.</p>
-              </div>
-              {SETTINGS_FIELDS.map(({ group, items }) => (
-                <div key={group} className="rounded-2xl border border-white/10 bg-white/[0.02] p-5 space-y-4">
-                  <h3 className="text-xs uppercase tracking-[0.2em] text-white/40 pb-2 border-b border-white/8">{group}</h3>
-                  {items.map(({ key, label, placeholder }) => (
-                    <div key={key} className="space-y-1.5">
-                      <label className="text-xs text-white/60 font-medium">{label}</label>
-                      <input
-                        value={settingsValues[key] ?? ""}
-                        onChange={(e) => setSettingsValues((prev) => ({ ...prev, [key]: e.target.value }))}
-                        placeholder={placeholder}
-                        className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors placeholder:text-white/20"
-                      />
-                    </div>
-                  ))}
-                </div>
-              ))}
-              <div className="flex items-center gap-3">
-                <button onClick={saveSettings} disabled={settingsSaving || supabaseOk === false}
-                  className="inline-flex items-center gap-2 rounded-full bg-white text-black px-6 py-2.5 text-sm font-medium hover:bg-white/90 transition-colors disabled:opacity-50">
-                  {settingsSaving ? <RefreshCw className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-                  {settingsSaving ? "Saving..." : "Save all settings"}
-                </button>
-                {supabaseOk === false && (
-                  <p className="text-xs text-amber-400">Connect Supabase first to save settings.</p>
-                )}
-              </div>
-            </div>
+            <SettingsTab
+              settingsValues={settingsValues}
+              setSettingsValues={setSettingsValues}
+              settingsSaving={settingsSaving}
+              saveSettings={saveSettings}
+              supabaseOk={supabaseOk}
+            />
           )}
         </div>
       </main>

@@ -51,7 +51,7 @@ function SponsorsPage() {
         <Sponsors />
 
         {/* Sponsor Application Form */}
-        <section className="py-24 px-6 relative overflow-hidden">
+        <section id="apply" className="py-24 px-6 relative overflow-hidden">
           <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
           <div className="relative max-w-2xl mx-auto">
             <FadeIn direction="up">
