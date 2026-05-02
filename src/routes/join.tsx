@@ -69,6 +69,15 @@ function JoinPage() {
       const { data } = await supabase.from("developer_profiles" as any)
         .select("*").eq("user_id", user.id).maybeSingle();
       if (data) {
+        const meta = user.user_metadata || {};
+        const freshAvatar = meta.avatar_url || meta.picture ||
+          (meta.user_name ? `https://avatars.githubusercontent.com/${meta.user_name}` : "");
+        if (freshAvatar && !data.avatar_url) {
+          await supabase.from("developer_profiles" as any)
+            .update({ avatar_url: freshAvatar })
+            .eq("user_id", user.id);
+          data.avatar_url = freshAvatar;
+        }
         setProfile(data);
         nav({ to: "/dashboard" });
       } else {
@@ -122,7 +131,7 @@ function JoinPage() {
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email: magicEmail,
-        options: { emailRedirectTo: `${window.location.origin}/join` },
+        options: { emailRedirectTo: "https://synapex.gleeze.com/join" },
       });
       if (error) throw error;
       setMagicSent(true);

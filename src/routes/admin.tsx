@@ -42,7 +42,7 @@ const NAV_ITEMS = [
 const TABLE_CONFIG: Record<string, { fields: string[]; orderBy: string }> = {
   events: { fields: ["title", "type", "summary", "image_url", "link_url", "event_date", "sort_order", "visible"], orderBy: "created_at" },
   services: { fields: ["title", "description", "icon", "sort_order", "visible"], orderBy: "sort_order" },
-  projects: { fields: ["title", "category", "description", "image_url", "tech", "live_url", "github_url", "sort_order", "visible"], orderBy: "sort_order" },
+  projects: { fields: ["title", "category", "description", "image_url", "tech", "live_url", "github_url", "is_open", "sort_order", "visible"], orderBy: "sort_order" },
   tech_stack: { fields: ["name", "category", "sort_order", "visible"], orderBy: "sort_order" },
   clients: { fields: ["name", "logo_url", "website_url", "sort_order", "visible"], orderBy: "sort_order" },
   testimonials: { fields: ["name", "role", "quote", "rating", "avatar_url", "sort_order", "visible"], orderBy: "sort_order" },
@@ -432,6 +432,7 @@ function AdminPage() {
   const [settingsSaving, setSettingsSaving] = useState(false);
   const [newSponsor, setNewSponsor] = useState({ name: "", logo_url: "", website_url: "", tier: "community", description: "" });
   const [addingSponsor, setAddingSponsor] = useState(false);
+  const [collabApps, setCollabApps] = useState<any[]>([]);
 
   const addToast = (type: "success" | "error", message: string) => {
     const id = Date.now();
@@ -491,6 +492,12 @@ function AdminPage() {
     }
     if (tab === "sponsors_mgmt") {
       loadSponsors();
+    }
+    if (tab === "projects") {
+      supabase.from("project_collaborators" as any)
+        .select("*, projects(title, category)")
+        .order("created_at", { ascending: false })
+        .then(({ data }) => setCollabApps(data || []));
     }
   }, [logged, tab]);
 
@@ -855,13 +862,27 @@ function AdminPage() {
                             : val ?? "";
                           const isLong = ["description", "bio", "quote", "features", "summary"].includes(f);
                           const isContent = f === "content";
-                          const isBool = ["is_popular", "published"].includes(f);
+                          const isBool = ["is_popular", "published", "is_open"].includes(f);
                           const isImage = IMAGE_FIELDS.includes(f);
+
+                          const isEventType = tab === "events" && f === "type";
 
                           return (
                             <div key={f} className={isLong || isContent || isImage ? "sm:col-span-2" : ""}>
                               <label className="text-[10px] uppercase tracking-wider text-white/35 mb-1.5 block">{f.replace(/_/g, " ")}</label>
-                              {isBool ? (
+                              {isEventType ? (
+                                <select
+                                  value={display}
+                                  onChange={(e) => { const next = [...rows]; next[idx][f] = e.target.value; setRows(next); }}
+                                  className="w-full bg-white/5 border border-white/10 rounded-xl px-3 py-2.5 text-sm focus:border-white/40 outline-none transition-colors text-white/80"
+                                >
+                                  <option value="update">Update</option>
+                                  <option value="news">News</option>
+                                  <option value="event">Event</option>
+                                  <option value="announcement">Announcement</option>
+                                  <option value="achievement">Achievement</option>
+                                </select>
+                              ) : isBool ? (
                                 <label className="flex items-center gap-2 cursor-pointer">
                                   <div
                                     onClick={() => { const next = [...rows]; next[idx][f] = !val; setRows(next); }}
@@ -919,6 +940,64 @@ function AdminPage() {
                   ))}
                 </AnimatePresence>
               )}
+            </div>
+          )}
+
+          {/* PROJECT COLLABORATION REQUESTS */}
+          {tab === "projects" && collabApps.length > 0 && (
+            <div className="mt-8 space-y-4">
+              <div className="flex items-center gap-3">
+                <span className="h-px flex-1 bg-white/8" />
+                <h3 className="text-xs uppercase tracking-[0.2em] text-white/40 whitespace-nowrap">Join requests</h3>
+                <span className="h-px flex-1 bg-white/8" />
+              </div>
+              <div className="space-y-3">
+                {collabApps.map((app) => (
+                  <div key={app.id} className={`rounded-2xl border p-4 flex flex-col sm:flex-row sm:items-center gap-4 ${
+                    app.status === "pending" ? "border-amber-500/20 bg-amber-500/5" :
+                    app.status === "accepted" ? "border-emerald-500/20 bg-emerald-500/5" :
+                    "border-white/8 bg-white/[0.02] opacity-60"
+                  }`}>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-medium">{app.developer_name || "Anonymous dev"}</span>
+                        <span className={`rounded-full text-[10px] px-2 py-0.5 border ${
+                          app.status === "pending" ? "bg-amber-500/15 border-amber-500/30 text-amber-400" :
+                          app.status === "accepted" ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400" :
+                          "bg-white/5 border-white/10 text-white/30"
+                        }`}>{app.status}</span>
+                      </div>
+                      <p className="text-xs text-white/40 mt-0.5">
+                        {app.developer_email} · <span className="text-white/60">{app.projects?.title || app.project_id}</span>
+                        {app.projects?.category && ` (${app.projects.category})`}
+                      </p>
+                      {app.message && <p className="text-xs text-white/55 mt-2 leading-relaxed italic">"{app.message}"</p>}
+                    </div>
+                    {app.status === "pending" && (
+                      <div className="flex gap-2 shrink-0">
+                        <button
+                          onClick={async () => {
+                            await supabase.from("project_collaborators" as any).update({ status: "accepted" }).eq("id", app.id);
+                            setCollabApps((prev) => prev.map((a) => a.id === app.id ? { ...a, status: "accepted" } : a));
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500 text-white px-4 py-2 text-xs font-medium hover:bg-emerald-400 transition-colors"
+                        >
+                          <CheckCircle className="h-3.5 w-3.5" /> Accept
+                        </button>
+                        <button
+                          onClick={async () => {
+                            await supabase.from("project_collaborators" as any).update({ status: "rejected" }).eq("id", app.id);
+                            setCollabApps((prev) => prev.map((a) => a.id === app.id ? { ...a, status: "rejected" } : a));
+                          }}
+                          className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs text-white/50 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                        >
+                          <X className="h-3.5 w-3.5" /> Decline
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
