@@ -3,7 +3,6 @@ import { SiteLayout } from "@/components/SiteLayout";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { FadeIn } from "@/components/FadeIn";
 import {
   Github, Globe, Code2, Users, Zap, Star,
@@ -86,11 +85,32 @@ function JoinPage() {
 
   async function signInGoogle() {
     setOauthLoading("google");
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: `${window.location.origin}/join`,
+    setMagicError(null);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: `${window.location.origin}/join`,
+        queryParams: { access_type: "offline", prompt: "consent" },
+      },
     });
-    if (result.error) {
-      setMagicError("Google sign-in failed: " + (result.error.message || "Unknown"));
+    if (error) {
+      setMagicError("Google sign-in failed: " + error.message);
+      setOauthLoading(null);
+    }
+  }
+
+  async function signInGitHub() {
+    setOauthLoading("github");
+    setMagicError(null);
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "github",
+      options: {
+        redirectTo: `${window.location.origin}/join`,
+        scopes: "read:user user:email",
+      },
+    });
+    if (error) {
+      setMagicError("GitHub sign-in failed: " + error.message);
       setOauthLoading(null);
     }
   }
@@ -116,6 +136,11 @@ function JoinPage() {
     if (!session) return;
     setSaving(true);
     try {
+      const meta = session.user.user_metadata || {};
+      const avatarUrl =
+        meta.avatar_url ||
+        meta.picture ||
+        (meta.user_name ? `https://avatars.githubusercontent.com/${meta.user_name}` : "");
       const { error } = await supabase.from("developer_profiles" as any).upsert({
         user_id: session.user.id,
         name: form.name,
@@ -124,7 +149,7 @@ function JoinPage() {
         github_url: form.github_url,
         portfolio_url: form.portfolio_url,
         skills: form.skills,
-        avatar_url: session.user.user_metadata?.avatar_url || "",
+        avatar_url: avatarUrl,
         status: "active",
       }, { onConflict: "user_id" });
       if (!error) {
@@ -197,6 +222,7 @@ function JoinPage() {
                   <div className="rounded-3xl border border-white/10 bg-white/[0.03] backdrop-blur-xl p-8 space-y-4">
                     <h2 className="text-lg font-semibold tracking-tight">Create your account</h2>
 
+                    {/* Google */}
                     <button
                       onClick={signInGoogle}
                       disabled={!!oauthLoading}
@@ -213,9 +239,19 @@ function JoinPage() {
                       Continue with Google
                     </button>
 
+                    {/* GitHub */}
+                    <button
+                      onClick={signInGitHub}
+                      disabled={!!oauthLoading}
+                      className="w-full flex items-center justify-center gap-3 rounded-2xl border border-white/15 bg-white/5 py-3.5 text-sm font-medium hover:bg-white/10 transition-colors disabled:opacity-50"
+                    >
+                      {oauthLoading === "github" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Github className="h-4 w-4" />}
+                      Continue with GitHub
+                    </button>
+
                     <div className="relative py-2">
                       <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-white/10" /></div>
-                      <div className="relative flex justify-center"><span className="bg-black px-3 text-[10px] uppercase tracking-[0.2em] text-white/30">or email</span></div>
+                      <div className="relative flex justify-center"><span className="bg-black px-3 text-[10px] uppercase tracking-[0.2em] text-white/30">or email magic link</span></div>
                     </div>
 
                     {magicSent ? (

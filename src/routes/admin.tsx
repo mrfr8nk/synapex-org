@@ -9,9 +9,11 @@ import {
   LayoutDashboard, FileText, Users, Star, DollarSign, Briefcase,
   MessageSquare, Settings, Eye, EyeOff, Upload, Link2, Mail,
   ExternalLink, ChevronRight, Layers, BookOpen, Code2, Globe,
-  Image as ImageIcon, X, Check, Inbox, Send,
+  Image as ImageIcon, X, Check, Inbox, Send, Newspaper, Zap,
+  Building2, Heart,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { ImageInput } from "@/components/ImageInput";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -21,6 +23,7 @@ type Toast = { id: number; type: "success" | "error"; message: string };
 
 const NAV_ITEMS = [
   { key: "overview", label: "Overview", Icon: LayoutDashboard },
+  { key: "events", label: "Events & News", Icon: Newspaper },
   { key: "services", label: "Services", Icon: Briefcase },
   { key: "projects", label: "Projects", Icon: Layers },
   { key: "tech_stack", label: "Tech Stack", Icon: Code2 },
@@ -29,12 +32,14 @@ const NAV_ITEMS = [
   { key: "team_members", label: "Team", Icon: Users },
   { key: "pricing_plans", label: "Pricing", Icon: DollarSign },
   { key: "blog_posts", label: "Blog Posts", Icon: BookOpen },
+  { key: "sponsors_mgmt", label: "Sponsors", Icon: Heart },
   { key: "developers", label: "Developers", Icon: FileText },
   { key: "messages", label: "Messages", Icon: Inbox },
   { key: "settings", label: "Site Settings", Icon: Settings },
 ];
 
 const TABLE_CONFIG: Record<string, { fields: string[]; orderBy: string }> = {
+  events: { fields: ["title", "type", "summary", "image_url", "link_url", "event_date", "sort_order", "visible"], orderBy: "created_at" },
   services: { fields: ["title", "description", "icon", "sort_order", "visible"], orderBy: "sort_order" },
   projects: { fields: ["title", "category", "description", "image_url", "tech", "live_url", "github_url", "sort_order", "visible"], orderBy: "sort_order" },
   tech_stack: { fields: ["name", "category", "sort_order", "visible"], orderBy: "sort_order" },
