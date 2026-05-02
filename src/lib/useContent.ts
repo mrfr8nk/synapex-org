@@ -6,34 +6,92 @@ import {
   fallbackPricing, fallbackContent, fallbackBlogPosts,
 } from "./content";
 
-function useTable<T>(table: string, fallback: T[], orderBy = "sort_order") {
+// Merge real DB rows with fallback rows.
+// - Real rows always show (if visible)
+// - Fallback rows show unless their id is in hidden_fallbacks
+function useMergedTable<T extends { id: string }>(
+  table: string,
+  fallback: T[],
+  section: string,
+  orderBy = "sort_order",
+) {
   const [data, setData] = useState<T[]>(fallback);
   useEffect(() => {
     let active = true;
     (async () => {
       try {
-        const { data: rows, error } = await supabase.from(table as any).select("*").order(orderBy, { ascending: true });
+        const [rowsRes, hiddenRes] = await Promise.all([
+          supabase.from(table as any).select("*").order(orderBy, { ascending: true }),
+          supabase.from("hidden_fallbacks" as any).select("fallback_id").eq("section", section),
+        ]);
         if (!active) return;
-        if (!error && rows && rows.length > 0) {
-          const visible = rows.filter((r: any) => r.visible !== false);
-          setData((visible.length > 0 ? visible : rows) as T[]);
-        }
+        const realRows = (rowsRes.data || []).filter((r: any) => r.visible !== false);
+        const hiddenIds = new Set((hiddenRes.data || []).map((h: any) => h.fallback_id));
+        const visibleFallback = fallback.filter((f) => !hiddenIds.has(f.id));
+        // Real first, fallback after — admin can hide fallback individually
+        setData([...realRows, ...visibleFallback] as T[]);
       } catch {
-        // Supabase not configured — keep fallback
+        // keep fallback
       }
     })();
     return () => { active = false; };
-  }, [table, orderBy]);
+  }, [table, orderBy, section]);
   return data;
 }
 
-export const useServices = () => useTable("services", fallbackServices);
-export const useProjects = () => useTable("projects", fallbackProjects);
-export const useTechStack = () => useTable("tech_stack", fallbackTechStack);
-export const useClients = () => useTable("clients", fallbackClients);
-export const useTestimonials = () => useTable("testimonials", fallbackTestimonials);
-export const useTeam = () => useTable("team_members", fallbackTeam);
-export const usePricing = () => useTable("pricing_plans", fallbackPricing);
+export const useServices = () => useMergedTable("services", fallbackServices as any, "services");
+export const useProjects = () => useMergedTable("projects", fallbackProjects as any, "projects");
+export const useTechStack = () => useMergedTable("tech_stack", fallbackTechStack as any, "tech_stack");
+export const useClients = () => useMergedTable("clients", fallbackClients as any, "clients");
+export const useTestimonials = () => useMergedTable("testimonials", fallbackTestimonials as any, "testimonials");
+export const useTeam = () => useMergedTable("team_members", fallbackTeam as any, "team");
+export const usePricing = () => useMergedTable("pricing_plans", fallbackPricing as any, "pricing");
+
+export function useSponsors() {
+  const [data, setData] = useState<any[]>([]);
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const { data: rows } = await supabase.from("sponsors" as any).select("*").order("sort_order", { ascending: true });
+        if (active && rows) setData(rows.filter((r: any) => r.visible !== false));
+      } catch {}
+    })();
+    return () => { active = false; };
+  }, []);
+  return data;
+}
+
+export function useEvents() {
+  const [data, setData] = useState<any[]>([]);
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const { data: rows } = await supabase.from("events" as any).select("*").order("created_at", { ascending: false });
+        if (active && rows) setData(rows.filter((r: any) => r.visible !== false));
+      } catch {}
+    })();
+    return () => { active = false; };
+  }, []);
+  return data;
+}
+
+export function useDevelopers() {
+  const [data, setData] = useState<any[]>([]);
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const { data: rows } = await supabase.from("developer_profiles" as any)
+          .select("*").eq("status", "active").order("joined_at", { ascending: false });
+        if (active && rows) setData(rows);
+      } catch {}
+    })();
+    return () => { active = false; };
+  }, []);
+  return data;
+}
 
 export function useBlogPosts(publishedOnly = true) {
   const [data, setData] = useState<any[]>(
@@ -43,17 +101,20 @@ export function useBlogPosts(publishedOnly = true) {
     let active = true;
     (async () => {
       try {
-        let query = supabase.from("blog_posts" as any).select("*").order("created_at", { ascending: false });
-        if (publishedOnly) query = (query as any).eq("published", true);
-        const { data: rows, error } = await query;
+        const [postsRes, hiddenRes] = await Promise.all([
+          (publishedOnly
+            ? supabase.from("blog_posts" as any).select("*").eq("published", true)
+            : supabase.from("blog_posts" as any).select("*")
+          ).order("created_at", { ascending: false }),
+          supabase.from("hidden_fallbacks" as any).select("fallback_id").eq("section", "blog"),
+        ]);
         if (!active) return;
-        if (!error && rows && rows.length > 0) {
-          const visible = rows.filter((r: any) => r.visible !== false);
-          setData((visible.length > 0 ? visible : rows) as any[]);
-        }
-      } catch {
-        // Supabase not configured
-      }
+        const realRows = (postsRes.data || []).filter((r: any) => r.visible !== false);
+        const hiddenIds = new Set((hiddenRes.data || []).map((h: any) => h.fallback_id));
+        const baseFallback = publishedOnly ? fallbackBlogPosts.filter((p) => p.published) : fallbackBlogPosts;
+        const visibleFallback = baseFallback.filter((f) => !hiddenIds.has(f.id));
+        setData([...realRows, ...visibleFallback]);
+      } catch {}
     })();
     return () => { active = false; };
   }, [publishedOnly]);
@@ -70,7 +131,12 @@ export function useBlogPost(slug: string) {
       try {
         const { data: rows, error } = await supabase.from("blog_posts" as any).select("*").eq("slug", slug).limit(1);
         if (!active) return;
-        if (!error && rows && rows.length > 0) setPost(rows[0]);
+        if (!error && rows && rows.length > 0) {
+          setPost(rows[0]);
+        } else {
+          const found = fallbackBlogPosts.find((p) => p.slug === slug);
+          if (found) setPost(found);
+        }
       } catch {
         const found = fallbackBlogPosts.find((p) => p.slug === slug);
         if (active && found) setPost(found);
@@ -95,9 +161,7 @@ export function useSiteContent() {
           merged[row.key] = row.value?.v ?? row.value;
         });
         setContent(merged);
-      } catch {
-        // Supabase not configured — keep fallback
-      }
+      } catch {}
     })();
     return () => { active = false; };
   }, []);
@@ -107,4 +171,19 @@ export function useSiteContent() {
 export async function saveSiteContentKey(key: string, value: any) {
   const { error: upsertErr } = await supabase.from("site_content" as any).upsert({ key, value: { v: value } }, { onConflict: "key" });
   return !upsertErr;
+}
+
+export async function hideFallback(section: string, fallbackId: string) {
+  const { error } = await supabase.from("hidden_fallbacks" as any).insert({ section, fallback_id: fallbackId });
+  return !error;
+}
+
+export async function unhideFallback(section: string, fallbackId: string) {
+  const { error } = await supabase.from("hidden_fallbacks" as any).delete().eq("section", section).eq("fallback_id", fallbackId);
+  return !error;
+}
+
+export async function listHiddenFallbacks(section: string) {
+  const { data } = await supabase.from("hidden_fallbacks" as any).select("fallback_id").eq("section", section);
+  return new Set((data || []).map((d: any) => d.fallback_id));
 }
