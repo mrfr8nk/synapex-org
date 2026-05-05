@@ -22,8 +22,10 @@ export type Database = {
           created_at: string | null
           id: number
           image_url: string | null
+          pending_approval: boolean
           published: boolean | null
           slug: string
+          submitted_by_user_id: string | null
           summary: string | null
           title: string
           visible: boolean
@@ -35,8 +37,10 @@ export type Database = {
           created_at?: string | null
           id?: never
           image_url?: string | null
+          pending_approval?: boolean
           published?: boolean | null
           slug: string
+          submitted_by_user_id?: string | null
           summary?: string | null
           title: string
           visible?: boolean
@@ -48,8 +52,10 @@ export type Database = {
           created_at?: string | null
           id?: never
           image_url?: string | null
+          pending_approval?: boolean
           published?: boolean | null
           slug?: string
+          submitted_by_user_id?: string | null
           summary?: string | null
           title?: string
           visible?: boolean
@@ -93,7 +99,9 @@ export type Database = {
           id: string
           message: string
           name: string
+          phone: string | null
           read: boolean
+          subject: string | null
         }
         Insert: {
           created_at?: string
@@ -101,7 +109,9 @@ export type Database = {
           id?: string
           message: string
           name: string
+          phone?: string | null
           read?: boolean
+          subject?: string | null
         }
         Update: {
           created_at?: string
@@ -109,7 +119,9 @@ export type Database = {
           id?: string
           message?: string
           name?: string
+          phone?: string | null
           read?: boolean
+          subject?: string | null
         }
         Relationships: []
       }
@@ -254,6 +266,24 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_subscribers: {
+        Row: {
+          email: string
+          id: string
+          subscribed_at: string | null
+        }
+        Insert: {
+          email: string
+          id?: string
+          subscribed_at?: string | null
+        }
+        Update: {
+          email?: string
+          id?: string
+          subscribed_at?: string | null
+        }
+        Relationships: []
+      }
       pricing_plans: {
         Row: {
           created_at: string
@@ -289,6 +319,41 @@ export type Database = {
           visible?: boolean
         }
         Relationships: []
+      }
+      project_updates: {
+        Row: {
+          content: string
+          created_at: string
+          developer_name: string | null
+          id: string
+          project_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          developer_name?: string | null
+          id?: string
+          project_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          developer_name?: string | null
+          id?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_updates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       projects: {
         Row: {
