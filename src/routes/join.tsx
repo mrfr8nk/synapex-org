@@ -68,17 +68,18 @@ function JoinPage() {
     try {
       const { data } = await supabase.from("developer_profiles" as any)
         .select("*").eq("user_id", user.id).maybeSingle();
-      if (data) {
+      const profileData: any = data;
+      if (profileData) {
         const meta = user.user_metadata || {};
         const freshAvatar = meta.avatar_url || meta.picture ||
           (meta.user_name ? `https://avatars.githubusercontent.com/${meta.user_name}` : "");
-        if (freshAvatar && !data.avatar_url) {
+        if (freshAvatar && !profileData.avatar_url) {
           await supabase.from("developer_profiles" as any)
             .update({ avatar_url: freshAvatar })
             .eq("user_id", user.id);
-          data.avatar_url = freshAvatar;
+          profileData.avatar_url = freshAvatar;
         }
-        setProfile(data);
+        setProfile(profileData);
         nav({ to: "/dashboard" });
       } else {
         const meta = user.user_metadata || {};

@@ -320,6 +320,39 @@ export type Database = {
         }
         Relationships: []
       }
+      project_collaborators: {
+        Row: {
+          created_at: string
+          developer_email: string | null
+          developer_name: string | null
+          id: string
+          message: string | null
+          project_id: string
+          status: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          developer_email?: string | null
+          developer_name?: string | null
+          id?: string
+          message?: string | null
+          project_id: string
+          status?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          developer_email?: string | null
+          developer_name?: string | null
+          id?: string
+          message?: string | null
+          project_id?: string
+          status?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       project_updates: {
         Row: {
           content: string
@@ -363,6 +396,7 @@ export type Database = {
           github_url: string | null
           id: string
           image_url: string | null
+          is_open: boolean
           live_url: string | null
           sort_order: number
           tech: string[]
@@ -376,6 +410,7 @@ export type Database = {
           github_url?: string | null
           id?: string
           image_url?: string | null
+          is_open?: boolean
           live_url?: string | null
           sort_order?: number
           tech?: string[]
@@ -389,6 +424,7 @@ export type Database = {
           github_url?: string | null
           id?: string
           image_url?: string | null
+          is_open?: boolean
           live_url?: string | null
           sort_order?: number
           tech?: string[]
@@ -484,6 +520,7 @@ export type Database = {
       sponsors: {
         Row: {
           created_at: string
+          description: string | null
           id: string
           logo_url: string | null
           message: string | null
@@ -495,6 +532,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          description?: string | null
           id?: string
           logo_url?: string | null
           message?: string | null
@@ -506,6 +544,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          description?: string | null
           id?: string
           logo_url?: string | null
           message?: string | null
