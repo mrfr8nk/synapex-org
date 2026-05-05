@@ -8,7 +8,7 @@ const LogoMark = ({ name, logoUrl }: { name: string; logoUrl?: string | null }) 
     return <img src={logoUrl} alt={name} className="h-8 w-auto max-w-[80px] object-contain" />;
   }
 
-  const marks: Record<string, JSX.Element> = {
+  const marks: Record<string, ReactElement> = {
     "Hack Club": (
       <svg viewBox="0 0 40 40" className="h-8 w-8">
         <path d="M20 4 L34 12 L34 28 L20 36 L6 28 L6 12 Z" fill="none" stroke="currentColor" strokeWidth="2" />
