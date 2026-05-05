@@ -20,11 +20,13 @@ function randomToken(bytes = 32): string {
   return Array.from(arr).map((b) => b.toString(16).padStart(2, "0")).join("");
 }
 
-const SMTP_HOST = Deno.env.get("SMTP_HOST") || "smtp.gmail.com";
-const SMTP_PORT = Number(Deno.env.get("SMTP_PORT") || "587");
-const SMTP_USER = Deno.env.get("SMTP_USER") || "support.fundo.ai@gmail.com";
-const SMTP_PASS = Deno.env.get("SMTP_PASS") || "audb xqfw xnyo gofd";
-const SMTP_FROM = Deno.env.get("SMTP_FROM") || SMTP_USER;
+// Support both SMTP_* and STMP_* (typo'd) secret names so existing setups work.
+const env = (k: string) => Deno.env.get(k) || Deno.env.get(k.replace("SMTP_", "STMP_")) || "";
+const SMTP_HOST = env("SMTP_HOST") || "smtp.gmail.com";
+const SMTP_PORT = Number(env("SMTP_PORT") || "587");
+const SMTP_USER = env("SMTP_USER");
+const SMTP_PASS = env("SMTP_PASS");
+const SMTP_FROM = env("SMTP_FROM") || SMTP_USER;
 
 async function sendMail(opts: { to: string; subject: string; html: string; text: string }) {
   const { SMTPClient } = await import("https://deno.land/x/denomailer@1.6.0/mod.ts");
