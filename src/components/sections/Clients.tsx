@@ -1,3 +1,4 @@
+import type { ReactElement } from "react";
 import { useClients } from "@/lib/useContent";
 import { motion } from "framer-motion";
 
