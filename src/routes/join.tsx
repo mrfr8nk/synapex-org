@@ -130,17 +130,17 @@ function JoinPage() {
     setMagicSending(true);
     setMagicError(null);
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: magicEmail,
-        options: {
-          emailRedirectTo: `${window.location.origin}/join`,
-          shouldCreateUser: true,
-        },
+      const fnUrl = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-magic-link`;
+      const res = await fetch(fnUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: magicEmail, origin: window.location.origin }),
       });
-      if (error) throw new Error(error.message || "Could not send email");
+      const json = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(json?.error || "Could not send email");
       setMagicSent(true);
     } catch (e: any) {
-      setMagicError(e?.message || "Could not send email. Please try GitHub or Google instead.");
+      setMagicError(e?.message || "Could not send email. Please try again.");
     }
     setMagicSending(false);
   }
