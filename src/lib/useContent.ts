@@ -28,7 +28,7 @@ function useMergedTable<T extends { id: string }>(
         const realRows = (rowsRes.data || []).filter((r: any) => r.visible !== false);
         const hiddenIds = new Set((hiddenRes.data || []).map((h: any) => h.fallback_id));
         if (realRows.length > 0) {
-          setData(realRows as T[]);
+          setData(realRows as unknown as T[]);
         } else {
           const visibleFallback = fallback.filter((f) => !hiddenIds.has(f.id));
           setData(visibleFallback as T[]);
