@@ -32,7 +32,7 @@ function JoinPage() {
   const [session, setSession] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
   const [checkingAuth, setCheckingAuth] = useState(true);
-  const [oauthLoading, setOauthLoading] = useState<string | null>(null);
+  // OAuth removed; magic-link only
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [magicEmail, setMagicEmail] = useState("");
