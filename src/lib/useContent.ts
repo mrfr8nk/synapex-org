@@ -114,9 +114,12 @@ export function useBlogPosts(publishedOnly = true) {
         if (!active) return;
         const realRows = (postsRes.data || []).filter((r: any) => r.visible !== false);
         const hiddenIds = new Set((hiddenRes.data || []).map((h: any) => h.fallback_id));
-        const baseFallback = publishedOnly ? fallbackBlogPosts.filter((p) => p.published) : fallbackBlogPosts;
-        const visibleFallback = baseFallback.filter((f) => !hiddenIds.has(f.id));
-        setData([...realRows, ...visibleFallback]);
+        if (realRows.length > 0) {
+          setData(realRows);
+        } else {
+          const baseFallback = publishedOnly ? fallbackBlogPosts.filter((p) => p.published) : fallbackBlogPosts;
+          setData(baseFallback.filter((f) => !hiddenIds.has(f.id)));
+        }
       } catch {}
     })();
     return () => { active = false; };
