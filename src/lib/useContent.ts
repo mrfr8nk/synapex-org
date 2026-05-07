@@ -27,9 +27,12 @@ function useMergedTable<T extends { id: string }>(
         if (!active) return;
         const realRows = (rowsRes.data || []).filter((r: any) => r.visible !== false);
         const hiddenIds = new Set((hiddenRes.data || []).map((h: any) => h.fallback_id));
-        const visibleFallback = fallback.filter((f) => !hiddenIds.has(f.id));
-        // Real first, fallback after — admin can hide fallback individually
-        setData([...realRows, ...visibleFallback] as T[]);
+        if (realRows.length > 0) {
+          setData(realRows as T[]);
+        } else {
+          const visibleFallback = fallback.filter((f) => !hiddenIds.has(f.id));
+          setData(visibleFallback as T[]);
+        }
       } catch {
         // keep fallback
       }
