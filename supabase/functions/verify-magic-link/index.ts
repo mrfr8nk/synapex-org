@@ -13,7 +13,7 @@ async function sha256(str: string): Promise<string> {
 Deno.serve(async (req) => {
   const url = new URL(req.url);
   const token = url.searchParams.get("token");
-  const redirect = url.searchParams.get("redirect") || "https://synapexdevelopers.lovable.app/join";
+  const redirect = url.searchParams.get("redirect") || "https://synapex.co.zw/dashboard";
   const fail = (reason: string) => Response.redirect(`${redirect}?magic=${reason}`, 302);
   if (!token) return fail("missing");
 
