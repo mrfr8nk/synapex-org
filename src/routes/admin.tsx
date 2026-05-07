@@ -582,8 +582,14 @@ function AdminPage() {
       cfg.fields.forEach((f) => {
         if (!(f in blank)) blank[f] = f === "tech" || f === "features" ? [] : ["is_popular", "published", "visible"].includes(f) ? (f === "visible" ? true : false) : f === "rating" ? 5 : "";
       });
-      if (tab === "services") blank.icon = "Code2";
-      if (tab === "blog_posts") { blank.slug = `post-${Date.now()}`; blank.published = false; blank.author = "Synapex Team"; }
+      if (tab === "services") { blank.icon = "Code2"; blank.title = "New service"; blank.description = "Describe this service."; }
+      if (tab === "projects") { blank.title = "New project"; blank.category = "Web"; blank.description = "Describe this project."; blank.tech = []; blank.is_open = false; }
+      if (tab === "tech_stack") { blank.name = "New tech"; blank.category = "Other"; }
+      if (tab === "clients") { blank.name = "New client"; }
+      if (tab === "testimonials") { blank.name = "New person"; blank.role = "Role"; blank.quote = "Their quote."; blank.rating = 5; }
+      if (tab === "team_members") { blank.name = "New member"; blank.role = "Role"; }
+      if (tab === "pricing_plans") { blank.name = "New plan"; blank.price = "$0"; blank.description = "Plan description."; blank.features = []; }
+      if (tab === "blog_posts") { blank.slug = `post-${Date.now()}`; blank.title = "New post"; blank.published = false; blank.author = "Synapex Team"; }
       if (tab === "events") { blank.title = "New event"; blank.type = "update"; blank.sort_order = rows.length; }
       const { error } = await supabase.from(tab as any).insert(blank);
       if (error) addToast("error", `Add failed: ${error.message}`);
