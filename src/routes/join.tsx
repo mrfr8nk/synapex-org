@@ -93,37 +93,7 @@ function JoinPage() {
     setCheckingAuth(false);
   }
 
-  async function signInGoogle() {
-    setOauthLoading("google");
-    setMagicError(null);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo: `${window.location.origin}/join`,
-        queryParams: { access_type: "offline", prompt: "consent" },
-      },
-    });
-    if (error) {
-      setMagicError("Google sign-in failed: " + error.message);
-      setOauthLoading(null);
-    }
-  }
-
-  async function signInGitHub() {
-    setOauthLoading("github");
-    setMagicError(null);
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: "github",
-      options: {
-        redirectTo: `${window.location.origin}/join`,
-        scopes: "read:user user:email",
-      },
-    });
-    if (error) {
-      setMagicError("GitHub sign-in failed: " + error.message);
-      setOauthLoading(null);
-    }
-  }
+  // Google/GitHub auth removed — magic-link via Resend only.
 
   async function sendMagic(e: React.FormEvent) {
     e.preventDefault();
