@@ -3,6 +3,7 @@ import { SiteLayout } from "@/components/SiteLayout";
 import { Services } from "@/components/sections/Services";
 import { Technologies } from "@/components/sections/Technologies";
 import { CTA } from "@/components/sections/CTA";
+import { Events } from "@/components/sections/Events";
 
 export const Route = createFileRoute("/services")({
   component: () => (
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/services")({
       </section>
       <Services />
       <Technologies />
+      <Events />
       <CTA />
     </SiteLayout>
   ),
