@@ -870,11 +870,11 @@ function AdminPage() {
                         {fields.filter((f) => f !== "visible").map((f) => {
                           const val = row[f];
                           const display = Array.isArray(val)
-                            ? (f === "features" ? val.join("\n") : val.join(", "))
+                            ? ((f === "features" || f === "requirements") ? val.join("\n") : val.join(", "))
                             : val ?? "";
-                          const isLong = ["description", "bio", "quote", "features", "summary"].includes(f);
+                          const isLong = ["description", "bio", "quote", "features", "summary", "requirements"].includes(f);
                           const isContent = f === "content";
-                          const isBool = ["is_popular", "published", "is_open"].includes(f);
+                          const isBool = ["is_popular", "published", "is_open", "open"].includes(f);
                           const isImage = IMAGE_FIELDS.includes(f);
 
                           const isEventType = tab === "events" && f === "type";
