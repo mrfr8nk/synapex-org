@@ -902,7 +902,7 @@ function AdminPage() {
                                   >
                                     <div className={`absolute top-0.5 h-4 w-4 rounded-full bg-black transition-all ${val ? "left-[18px]" : "left-0.5"}`} />
                                   </div>
-                                  <span className="text-sm text-white/60">{f === "published" ? (val ? "Published" : "Draft") : (val ? "Popular" : "Standard")}</span>
+                                  <span className="text-sm text-white/60">{f === "published" ? (val ? "Published" : "Draft") : f === "open" ? (val ? "Open" : "Closed") : f === "is_open" ? (val ? "Open to collab" : "Closed") : (val ? "Popular" : "Standard")}</span>
                                 </label>
                               ) : isImage ? (
                                 <ImageInput value={display} onChange={(v) => { const next = [...rows]; next[idx][f] = v; setRows(next); }} />
