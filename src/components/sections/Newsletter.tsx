@@ -87,6 +87,7 @@ export function Newsletter() {
                   <>Subscribe <ArrowRight className="h-4 w-4" /></>
                 )}
               </motion.button>
+              </div>
             </form>
             {status === "error" && (
               <p className="mt-3 text-xs text-red-400 text-center">{errMsg}</p>
