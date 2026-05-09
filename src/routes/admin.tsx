@@ -566,6 +566,7 @@ function AdminPage() {
     try {
       const { id, created_at, ...rest } = row;
       if (rest.tech && typeof rest.tech === "string") rest.tech = rest.tech.split(",").map((s: string) => s.trim()).filter(Boolean);
+      if (rest.requirements && typeof rest.requirements === "string") rest.requirements = rest.requirements.split("\n").map((s: string) => s.trim()).filter(Boolean);
       if (rest.features && typeof rest.features === "string") rest.features = rest.features.split("\n").map((s: string) => s.trim()).filter(Boolean);
       const { error } = await supabase.from(tab as any).update(rest).eq("id", id);
       if (error) addToast("error", `Save failed: ${error.message}`);
