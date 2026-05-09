@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as SponsorsRouteImport } from './routes/sponsors'
 import { Route as ServicesRouteImport } from './routes/services'
@@ -26,6 +27,11 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -123,6 +129,7 @@ export interface FileRoutesByFullPath {
   '/services': typeof ServicesRoute
   '/sponsors': typeof SponsorsRoute
   '/team': typeof TeamRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
 export interface FileRoutesByTo {
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/services': typeof ServicesRoute
   '/sponsors': typeof SponsorsRoute
   '/team': typeof TeamRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
 export interface FileRoutesById {
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/services': typeof ServicesRoute
   '/sponsors': typeof SponsorsRoute
   '/team': typeof TeamRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
 export interface FileRouteTypes {
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sponsors'
     | '/team'
+    | '/unsubscribe'
     | '/blog/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sponsors'
     | '/team'
+    | '/unsubscribe'
     | '/blog/$slug'
   id:
     | '__root__'
@@ -216,6 +227,7 @@ export interface FileRouteTypes {
     | '/services'
     | '/sponsors'
     | '/team'
+    | '/unsubscribe'
     | '/blog/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -235,10 +247,18 @@ export interface RootRouteChildren {
   ServicesRoute: typeof ServicesRoute
   SponsorsRoute: typeof SponsorsRoute
   TeamRoute: typeof TeamRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/team': {
       id: '/team'
       path: '/team'
@@ -380,6 +400,7 @@ const rootRouteChildren: RootRouteChildren = {
   ServicesRoute: ServicesRoute,
   SponsorsRoute: SponsorsRoute,
   TeamRoute: TeamRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
