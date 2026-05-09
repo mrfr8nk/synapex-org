@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 export function Newsletter() {
   const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errMsg, setErrMsg] = useState("");
 
@@ -15,13 +16,13 @@ export function Newsletter() {
     setStatus("loading");
     setErrMsg("");
     try {
-      const { error } = await supabase.from("newsletter_subscribers" as any).upsert(
-        { email: email.trim().toLowerCase() },
-        { onConflict: "email" }
-      );
+      const { data, error } = await supabase.functions.invoke("newsletter", {
+        body: { action: "subscribe", email: email.trim().toLowerCase(), name: name.trim() || undefined },
+      });
       if (error) throw error;
+      if (data?.error) throw new Error(data.error);
       setStatus("success");
-      setEmail("");
+      setEmail(""); setName("");
     } catch (e: any) {
       setErrMsg(e?.message || "Could not subscribe. Please try again.");
       setStatus("error");
