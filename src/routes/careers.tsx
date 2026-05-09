@@ -6,6 +6,8 @@ import { SectionHeader } from "@/components/sections/Services";
 import { FadeIn } from "@/components/FadeIn";
 import { CTA } from "@/components/sections/CTA";
 import { fallbackCareers } from "@/lib/content";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/careers")({
   component: CareersPage,
@@ -18,8 +20,21 @@ const typeColors: Record<string, string> = {
   "Internship": "from-orange-500/20 to-amber-600/20",
 };
 
+function useJobs() {
+  const [jobs, setJobs] = useState<any[]>(fallbackCareers as any[]);
+  useEffect(() => {
+    supabase.from("jobs" as any).select("*").order("sort_order", { ascending: true })
+      .then(({ data }) => {
+        const rows = (data || []).filter((j: any) => j.visible !== false);
+        if (rows.length > 0) setJobs(rows);
+      });
+  }, []);
+  return jobs;
+}
+
 function CareersPage() {
-  const openJobs = fallbackCareers.filter((j: any) => j.open);
+  const allJobs = useJobs();
+  const openJobs = allJobs.filter((j: any) => j.open);
 
   return (
     <SiteLayout>
@@ -65,19 +80,20 @@ function CareersPage() {
             <FadeIn direction="up">
               <div className="text-center py-16 rounded-3xl glass text-white/40">
                 <p>No open positions right now.</p>
-                <p className="text-sm mt-1">Send a speculative application to <span className="text-white/70">careers@synapex.dev</span></p>
+                <p className="text-sm mt-1">Send a speculative application to <span className="text-white/70">careers@synapex.co.zw</span></p>
               </div>
             </FadeIn>
           ) : (
             <div className="space-y-4">
               {openJobs.map((job: any, i: number) => {
                 const gradient = typeColors[job.type] || "from-white/10 to-white/5";
+                const applyHref = job.apply_url || `mailto:careers@synapex.co.zw?subject=Application: ${job.title}`;
                 return (
                   <FadeIn key={job.id} direction={i % 2 === 0 ? "left" : "right"} delay={i * 0.06}>
                     <motion.div
                       whileHover={{ x: 4 }}
                       transition={{ duration: 0.25 }}
-                      className="group rounded-2xl glass p-6 md:p-8 hover:bg-white/[0.04] transition-all duration-500"
+                      className="group relative rounded-2xl glass p-6 md:p-8 hover:bg-white/[0.04] transition-all duration-500"
                     >
                       <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none`} />
                       <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -100,7 +116,7 @@ function CareersPage() {
                           )}
                         </div>
                         <a
-                          href={`mailto:careers@synapex.dev?subject=Application: ${job.title}`}
+                          href={applyHref}
                           className="inline-flex items-center gap-2 rounded-full glass px-5 py-2.5 text-sm whitespace-nowrap hover:bg-white hover:text-black transition-all duration-300 shrink-0"
                         >
                           Apply now <ArrowUpRight className="h-3.5 w-3.5" />
@@ -117,10 +133,10 @@ function CareersPage() {
             <p className="text-lg font-medium tracking-tight">Don't see your role?</p>
             <p className="mt-2 text-sm text-white/50">Send us a speculative application. We're always looking for exceptional people.</p>
             <a
-              href="mailto:careers@synapex.dev"
+              href="mailto:careers@synapex.co.zw"
               className="mt-6 inline-flex items-center gap-2 rounded-full bg-white text-black px-6 py-3 text-sm font-medium hover:bg-white/90 transition-colors"
             >
-              careers@synapex.dev →
+              careers@synapex.co.zw →
             </a>
           </FadeIn>
         </div>
