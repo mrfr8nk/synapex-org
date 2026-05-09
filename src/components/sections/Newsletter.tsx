@@ -57,7 +57,15 @@ export function Newsletter() {
             </motion.div>
           ) : (
             <>
-            <form onSubmit={handleSubmit} className="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+            <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-3 max-w-md mx-auto">
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Your name (optional)"
+                className="rounded-full bg-white/5 border border-white/10 px-5 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-white/30 transition-colors"
+              />
+              <div className="flex flex-col sm:flex-row gap-3">
               <input
                 type="email"
                 value={email}
