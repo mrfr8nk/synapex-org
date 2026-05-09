@@ -9,11 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as UnsubscribeRouteImport } from './routes/unsubscribe'
 import { Route as TeamRouteImport } from './routes/team'
 import { Route as SponsorsRouteImport } from './routes/sponsors'
 import { Route as ServicesRouteImport } from './routes/services'
 import { Route as ProjectsRouteImport } from './routes/projects'
 import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as NewsRouteImport } from './routes/news'
 import { Route as JoinRouteImport } from './routes/join'
 import { Route as FaqRouteImport } from './routes/faq'
 import { Route as DashboardRouteImport } from './routes/dashboard'
@@ -25,6 +27,11 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BlogSlugRouteImport } from './routes/blog.$slug'
 
+const UnsubscribeRoute = UnsubscribeRouteImport.update({
+  id: '/unsubscribe',
+  path: '/unsubscribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TeamRoute = TeamRouteImport.update({
   id: '/team',
   path: '/team',
@@ -48,6 +55,11 @@ const ProjectsRoute = ProjectsRouteImport.update({
 const PricingRoute = PricingRouteImport.update({
   id: '/pricing',
   path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NewsRoute = NewsRouteImport.update({
+  id: '/news',
+  path: '/news',
   getParentRoute: () => rootRouteImport,
 } as any)
 const JoinRoute = JoinRouteImport.update({
@@ -111,11 +123,13 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof DashboardRoute
   '/faq': typeof FaqRoute
   '/join': typeof JoinRoute
+  '/news': typeof NewsRoute
   '/pricing': typeof PricingRoute
   '/projects': typeof ProjectsRoute
   '/services': typeof ServicesRoute
   '/sponsors': typeof SponsorsRoute
   '/team': typeof TeamRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
 export interface FileRoutesByTo {
@@ -128,11 +142,13 @@ export interface FileRoutesByTo {
   '/dashboard': typeof DashboardRoute
   '/faq': typeof FaqRoute
   '/join': typeof JoinRoute
+  '/news': typeof NewsRoute
   '/pricing': typeof PricingRoute
   '/projects': typeof ProjectsRoute
   '/services': typeof ServicesRoute
   '/sponsors': typeof SponsorsRoute
   '/team': typeof TeamRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
 export interface FileRoutesById {
@@ -146,11 +162,13 @@ export interface FileRoutesById {
   '/dashboard': typeof DashboardRoute
   '/faq': typeof FaqRoute
   '/join': typeof JoinRoute
+  '/news': typeof NewsRoute
   '/pricing': typeof PricingRoute
   '/projects': typeof ProjectsRoute
   '/services': typeof ServicesRoute
   '/sponsors': typeof SponsorsRoute
   '/team': typeof TeamRoute
+  '/unsubscribe': typeof UnsubscribeRoute
   '/blog/$slug': typeof BlogSlugRoute
 }
 export interface FileRouteTypes {
@@ -165,11 +183,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/faq'
     | '/join'
+    | '/news'
     | '/pricing'
     | '/projects'
     | '/services'
     | '/sponsors'
     | '/team'
+    | '/unsubscribe'
     | '/blog/$slug'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -182,11 +202,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/faq'
     | '/join'
+    | '/news'
     | '/pricing'
     | '/projects'
     | '/services'
     | '/sponsors'
     | '/team'
+    | '/unsubscribe'
     | '/blog/$slug'
   id:
     | '__root__'
@@ -199,11 +221,13 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/faq'
     | '/join'
+    | '/news'
     | '/pricing'
     | '/projects'
     | '/services'
     | '/sponsors'
     | '/team'
+    | '/unsubscribe'
     | '/blog/$slug'
   fileRoutesById: FileRoutesById
 }
@@ -217,15 +241,24 @@ export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRoute
   FaqRoute: typeof FaqRoute
   JoinRoute: typeof JoinRoute
+  NewsRoute: typeof NewsRoute
   PricingRoute: typeof PricingRoute
   ProjectsRoute: typeof ProjectsRoute
   ServicesRoute: typeof ServicesRoute
   SponsorsRoute: typeof SponsorsRoute
   TeamRoute: typeof TeamRoute
+  UnsubscribeRoute: typeof UnsubscribeRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/unsubscribe': {
+      id: '/unsubscribe'
+      path: '/unsubscribe'
+      fullPath: '/unsubscribe'
+      preLoaderRoute: typeof UnsubscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/team': {
       id: '/team'
       path: '/team'
@@ -259,6 +292,13 @@ declare module '@tanstack/react-router' {
       path: '/pricing'
       fullPath: '/pricing'
       preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/news': {
+      id: '/news'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof NewsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/join': {
@@ -354,11 +394,13 @@ const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRoute,
   FaqRoute: FaqRoute,
   JoinRoute: JoinRoute,
+  NewsRoute: NewsRoute,
   PricingRoute: PricingRoute,
   ProjectsRoute: ProjectsRoute,
   ServicesRoute: ServicesRoute,
   SponsorsRoute: SponsorsRoute,
   TeamRoute: TeamRoute,
+  UnsubscribeRoute: UnsubscribeRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

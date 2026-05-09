@@ -12,6 +12,7 @@ const primaryLinks = [
 ] as const;
 
 const moreLinks = [
+  { to: "/news", label: "News" },
   { to: "/blog", label: "Blog" },
   { to: "/team", label: "Team" },
   { to: "/faq", label: "FAQ" },

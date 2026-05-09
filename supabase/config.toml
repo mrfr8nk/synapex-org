@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.verify-magic-link]
 verify_jwt = false
+
+[functions.newsletter]
+verify_jwt = false

@@ -239,6 +239,54 @@ export type Database = {
         }
         Relationships: []
       }
+      jobs: {
+        Row: {
+          apply_url: string | null
+          created_at: string
+          department: string
+          description: string
+          id: string
+          location: string
+          open: boolean
+          requirements: string[]
+          salary_range: string | null
+          sort_order: number
+          title: string
+          type: string
+          visible: boolean
+        }
+        Insert: {
+          apply_url?: string | null
+          created_at?: string
+          department?: string
+          description?: string
+          id?: string
+          location?: string
+          open?: boolean
+          requirements?: string[]
+          salary_range?: string | null
+          sort_order?: number
+          title: string
+          type?: string
+          visible?: boolean
+        }
+        Update: {
+          apply_url?: string | null
+          created_at?: string
+          department?: string
+          description?: string
+          id?: string
+          location?: string
+          open?: boolean
+          requirements?: string[]
+          salary_range?: string | null
+          sort_order?: number
+          title?: string
+          type?: string
+          visible?: boolean
+        }
+        Relationships: []
+      }
       magic_link_tokens: {
         Row: {
           created_at: string
@@ -270,17 +318,26 @@ export type Database = {
         Row: {
           email: string
           id: string
+          name: string | null
+          status: string
           subscribed_at: string | null
+          unsubscribe_token: string | null
         }
         Insert: {
           email: string
           id?: string
+          name?: string | null
+          status?: string
           subscribed_at?: string | null
+          unsubscribe_token?: string | null
         }
         Update: {
           email?: string
           id?: string
+          name?: string | null
+          status?: string
           subscribed_at?: string | null
+          unsubscribe_token?: string | null
         }
         Relationships: []
       }
