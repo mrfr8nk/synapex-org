@@ -583,7 +583,7 @@ function AdminPage() {
       const cfg = TABLE_CONFIG[tab];
       const blank: any = cfg.orderBy === "sort_order" ? { sort_order: rows.length, visible: true } : { visible: true };
       cfg.fields.forEach((f) => {
-        if (!(f in blank)) blank[f] = f === "tech" || f === "features" ? [] : ["is_popular", "published", "visible"].includes(f) ? (f === "visible" ? true : false) : f === "rating" ? 5 : "";
+        if (!(f in blank)) blank[f] = (f === "tech" || f === "features" || f === "requirements") ? [] : ["is_popular", "published", "visible", "open"].includes(f) ? (f === "visible" || f === "open" ? true : false) : f === "rating" ? 5 : "";
       });
       if (tab === "services") { blank.icon = "Code2"; blank.title = "New service"; blank.description = "Describe this service."; }
       if (tab === "projects") { blank.title = "New project"; blank.category = "Web"; blank.description = "Describe this project."; blank.tech = []; blank.is_open = false; }
@@ -594,6 +594,7 @@ function AdminPage() {
       if (tab === "pricing_plans") { blank.name = "New plan"; blank.price = "$0"; blank.description = "Plan description."; blank.features = []; }
       if (tab === "blog_posts") { blank.slug = `post-${Date.now()}`; blank.title = "New post"; blank.published = false; blank.author = "Synapex Team"; }
       if (tab === "events") { blank.title = "New event"; blank.type = "update"; blank.sort_order = rows.length; }
+      if (tab === "jobs") { blank.title = "New role"; blank.type = "Full-time"; blank.location = "Remote"; blank.department = "Engineering"; blank.description = "Describe the role."; blank.requirements = []; blank.open = true; }
       const { error } = await supabase.from(tab as any).insert(blank);
       if (error) addToast("error", `Add failed: ${error.message}`);
       else { addToast("success", "Added new item"); await loadTab(tab); await loadStats(); }
