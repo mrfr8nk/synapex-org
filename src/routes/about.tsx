@@ -4,6 +4,7 @@ import { motion } from "framer-motion";
 import { SectionHeader } from "@/components/sections/Services";
 import { Target, Eye, Heart, Zap } from "lucide-react";
 import { CTA } from "@/components/sections/CTA";
+import { Events } from "@/components/sections/Events";
 import { useSiteContent } from "@/lib/useContent";
 
 export const Route = createFileRoute("/about")({
@@ -106,6 +107,7 @@ function AboutPage() {
         </div>
       </section>
 
+      <Events />
       <CTA />
     </SiteLayout>
   );
