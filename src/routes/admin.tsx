@@ -42,6 +42,7 @@ const NAV_ITEMS = [
 
 const TABLE_CONFIG: Record<string, { fields: string[]; orderBy: string }> = {
   events: { fields: ["title", "type", "summary", "image_url", "link_url", "event_date", "sort_order", "visible"], orderBy: "created_at" },
+  jobs: { fields: ["title", "type", "location", "department", "description", "requirements", "salary_range", "apply_url", "open", "sort_order", "visible"], orderBy: "sort_order" },
   services: { fields: ["title", "description", "icon", "sort_order", "visible"], orderBy: "sort_order" },
   projects: { fields: ["title", "category", "description", "image_url", "tech", "live_url", "github_url", "is_open", "sort_order", "visible"], orderBy: "sort_order" },
   tech_stack: { fields: ["name", "category", "sort_order", "visible"], orderBy: "sort_order" },
