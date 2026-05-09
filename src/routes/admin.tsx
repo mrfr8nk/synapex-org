@@ -24,6 +24,7 @@ type Toast = { id: number; type: "success" | "error"; message: string };
 const NAV_ITEMS = [
   { key: "overview", label: "Overview", Icon: LayoutDashboard },
   { key: "events", label: "Events & News", Icon: Newspaper },
+  { key: "jobs", label: "Jobs", Icon: Briefcase },
   { key: "services", label: "Services", Icon: Briefcase },
   { key: "projects", label: "Projects", Icon: Layers },
   { key: "tech_stack", label: "Tech Stack", Icon: Code2 },
