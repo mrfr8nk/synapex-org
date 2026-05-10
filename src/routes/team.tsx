@@ -10,6 +10,18 @@ import { supabase } from "@/integrations/supabase/client";
 import { FadeIn } from "@/components/FadeIn";
 
 export const Route = createFileRoute("/team")({
+  head: () => ({
+    meta: [
+      { title: "Team & Developer Network | Synapex Technologies" },
+      { name: "description", content: "Meet the Synapex Technologies team and global developer network led by founder Darrell Mucheri." },
+      { property: "og:title", content: "Team & Developer Network | Synapex Technologies" },
+      { property: "og:description", content: "Meet the Synapex Technologies team and global developer network led by founder Darrell Mucheri." },
+      { property: "og:url", content: "https://synapex.co.zw/team" },
+      { name: "twitter:title", content: "Team & Developer Network | Synapex Technologies" },
+      { name: "twitter:description", content: "Meet the Synapex Technologies team and global developer network led by founder Darrell Mucheri." },
+    ],
+    links: [{ rel: "canonical", href: "https://synapex.co.zw/team" }],
+  }),
   component: TeamPage,
 });
 

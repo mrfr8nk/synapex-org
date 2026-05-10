@@ -17,6 +17,18 @@ import { Events } from "@/components/sections/Events";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  head: () => ({
+    meta: [
+      { title: "Synapex Technologies — Websites, Apps, AI & Software | Synapex Developers" },
+      { name: "description", content: "Synapex Technologies builds premium websites, mobile apps and AI systems for ambitious teams. Founded by Darrell Mucheri." },
+      { property: "og:title", content: "Synapex Technologies — Premium Software Agency" },
+      { property: "og:description", content: "Websites, apps and AI systems by Synapex Developers. Founded by Darrell Mucheri." },
+      { property: "og:url", content: "https://synapex.co.zw/" },
+      { name: "twitter:title", content: "Synapex Technologies — Premium Software Agency" },
+      { name: "twitter:description", content: "Websites, apps and AI systems by Synapex Developers." },
+    ],
+    links: [{ rel: "canonical", href: "https://synapex.co.zw/" }],
+  }),
 });
 
 function Index() {

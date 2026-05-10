@@ -8,6 +8,18 @@ import { useSiteContent } from "@/lib/useContent";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/contact")({
+  head: () => ({
+    meta: [
+      { title: "Contact Synapex Technologies | Get in Touch" },
+      { name: "description", content: "Contact Synapex Developers — let's build your next website, app or AI product. Founded by Darrell Mucheri." },
+      { property: "og:title", content: "Contact Synapex Technologies | Get in Touch" },
+      { property: "og:description", content: "Contact Synapex Developers — let's build your next website, app or AI product. Founded by Darrell Mucheri." },
+      { property: "og:url", content: "https://synapex.co.zw/contact" },
+      { name: "twitter:title", content: "Contact Synapex Technologies | Get in Touch" },
+      { name: "twitter:description", content: "Contact Synapex Developers — let's build your next website, app or AI product. Founded by Darrell Mucheri." },
+    ],
+    links: [{ rel: "canonical", href: "https://synapex.co.zw/contact" }],
+  }),
   component: ContactPage,
 });
 

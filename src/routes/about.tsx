@@ -8,6 +8,18 @@ import { Events } from "@/components/sections/Events";
 import { useSiteContent } from "@/lib/useContent";
 
 export const Route = createFileRoute("/about")({
+  head: () => ({
+    meta: [
+      { title: "About Synapex Technologies — Our Story & Team" },
+      { name: "description", content: "Learn about Synapex Technologies, founded by Darrell Mucheri. Africa's premium software agency building websites, apps and AI." },
+      { property: "og:title", content: "About Synapex Technologies — Our Story & Team" },
+      { property: "og:description", content: "Learn about Synapex Technologies, founded by Darrell Mucheri. Africa's premium software agency building websites, apps and AI." },
+      { property: "og:url", content: "https://synapex.co.zw/about" },
+      { name: "twitter:title", content: "About Synapex Technologies — Our Story & Team" },
+      { name: "twitter:description", content: "Learn about Synapex Technologies, founded by Darrell Mucheri. Africa's premium software agency building websites, apps and AI." },
+    ],
+    links: [{ rel: "canonical", href: "https://synapex.co.zw/about" }],
+  }),
   component: AboutPage,
 });
 
