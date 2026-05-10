@@ -1,4 +1,4 @@
-import { Outlet, Link, createRootRoute, HeadContent, Scripts } from "@tanstack/react-router";
+import { Outlet, Link, createRootRoute, HeadContent } from "@tanstack/react-router";
 
 const SITE_URL = "https://synapex.co.zw";
 const SITE_NAME = "Synapex Technologies";
@@ -121,7 +121,6 @@ function RootComponent() {
     <>
       <HeadContent />
       <Outlet />
-      <Scripts />
     </>
   );
 }
