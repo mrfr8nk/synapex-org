@@ -7,6 +7,18 @@ import { SectionHeader } from "@/components/sections/Services";
 import { usePricing } from "@/lib/useContent";
 
 export const Route = createFileRoute("/pricing")({
+  head: () => ({
+    meta: [
+      { title: "Pricing — Plans for Every Team | Synapex Developers" },
+      { name: "description", content: "Transparent pricing from Synapex Technologies. Pick a plan for websites, apps, AI and software development." },
+      { property: "og:title", content: "Pricing — Plans for Every Team | Synapex Developers" },
+      { property: "og:description", content: "Transparent pricing from Synapex Technologies. Pick a plan for websites, apps, AI and software development." },
+      { property: "og:url", content: "https://synapex.co.zw/pricing" },
+      { name: "twitter:title", content: "Pricing — Plans for Every Team | Synapex Developers" },
+      { name: "twitter:description", content: "Transparent pricing from Synapex Technologies. Pick a plan for websites, apps, AI and software development." },
+    ],
+    links: [{ rel: "canonical", href: "https://synapex.co.zw/pricing" }],
+  }),
   component: PricingPage,
 });
 

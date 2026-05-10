@@ -6,6 +6,18 @@ import { CTA } from "@/components/sections/CTA";
 import { Events } from "@/components/sections/Events";
 
 export const Route = createFileRoute("/services")({
+  head: () => ({
+    meta: [
+      { title: "Services — Web, Mobile, AI & Software | Synapex" },
+      { name: "description", content: "Synapex Developers services: web development, mobile apps, AI integration, SaaS and custom software for ambitious teams." },
+      { property: "og:title", content: "Services — Web, Mobile, AI & Software | Synapex" },
+      { property: "og:description", content: "Synapex Developers services: web development, mobile apps, AI integration, SaaS and custom software for ambitious teams." },
+      { property: "og:url", content: "https://synapex.co.zw/services" },
+      { name: "twitter:title", content: "Services — Web, Mobile, AI & Software | Synapex" },
+      { name: "twitter:description", content: "Synapex Developers services: web development, mobile apps, AI integration, SaaS and custom software for ambitious teams." },
+    ],
+    links: [{ rel: "canonical", href: "https://synapex.co.zw/services" }],
+  }),
   component: () => (
     <SiteLayout>
       <section className="pt-32 pb-8 px-6 text-center max-w-4xl mx-auto relative">

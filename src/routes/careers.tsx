@@ -10,6 +10,18 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/careers")({
+  head: () => ({
+    meta: [
+      { title: "Careers at Synapex Technologies | Join Us" },
+      { name: "description", content: "Open roles at Synapex Developers. Join Africa's most ambitious software agency. Founded by Darrell Mucheri." },
+      { property: "og:title", content: "Careers at Synapex Technologies | Join Us" },
+      { property: "og:description", content: "Open roles at Synapex Developers. Join Africa's most ambitious software agency. Founded by Darrell Mucheri." },
+      { property: "og:url", content: "https://synapex.co.zw/careers" },
+      { name: "twitter:title", content: "Careers at Synapex Technologies | Join Us" },
+      { name: "twitter:description", content: "Open roles at Synapex Developers. Join Africa's most ambitious software agency. Founded by Darrell Mucheri." },
+    ],
+    links: [{ rel: "canonical", href: "https://synapex.co.zw/careers" }],
+  }),
   component: CareersPage,
 });
 

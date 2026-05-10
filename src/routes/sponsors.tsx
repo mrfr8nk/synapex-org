@@ -9,6 +9,18 @@ import { FadeIn } from "@/components/FadeIn";
 import { ArrowRight, CheckCircle, Loader2, Heart } from "lucide-react";
 
 export const Route = createFileRoute("/sponsors")({
+  head: () => ({
+    meta: [
+      { title: "Sponsors & Partners | Synapex Technologies" },
+      { name: "description", content: "Sponsor Synapex Developers and support open source, community events and the next generation of African engineers." },
+      { property: "og:title", content: "Sponsors & Partners | Synapex Technologies" },
+      { property: "og:description", content: "Sponsor Synapex Developers and support open source, community events and the next generation of African engineers." },
+      { property: "og:url", content: "https://synapex.co.zw/sponsors" },
+      { name: "twitter:title", content: "Sponsors & Partners | Synapex Technologies" },
+      { name: "twitter:description", content: "Sponsor Synapex Developers and support open source, community events and the next generation of African engineers." },
+    ],
+    links: [{ rel: "canonical", href: "https://synapex.co.zw/sponsors" }],
+  }),
   component: SponsorsPage,
 });
 

@@ -9,6 +9,18 @@ import { CTA } from "@/components/sections/CTA";
 import { fallbackFaq } from "@/lib/content";
 
 export const Route = createFileRoute("/faq")({
+  head: () => ({
+    meta: [
+      { title: "FAQ — Frequently Asked Questions | Synapex" },
+      { name: "description", content: "Answers to common questions about working with Synapex Technologies — process, pricing, timelines and more." },
+      { property: "og:title", content: "FAQ — Frequently Asked Questions | Synapex" },
+      { property: "og:description", content: "Answers to common questions about working with Synapex Technologies — process, pricing, timelines and more." },
+      { property: "og:url", content: "https://synapex.co.zw/faq" },
+      { name: "twitter:title", content: "FAQ — Frequently Asked Questions | Synapex" },
+      { name: "twitter:description", content: "Answers to common questions about working with Synapex Technologies — process, pricing, timelines and more." },
+    ],
+    links: [{ rel: "canonical", href: "https://synapex.co.zw/faq" }],
+  }),
   component: FaqPage,
 });
 
