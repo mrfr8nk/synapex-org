@@ -1,6 +1,7 @@
 // Supabase Edge Function: send-magic-link
-// Sends a branded magic-link email via Resend (noreply@noreply.synapex.co.zw).
+// Sends a branded magic-link email via Resend.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { renderEmail, button, infoChips } from "../_shared/email-shell.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -26,67 +27,27 @@ async function sendViaResend(opts: { to: string; subject: string; html: string; 
   if (!RESEND_API_KEY) throw new Error("RESEND_API_KEY not configured");
   const res = await fetch("https://api.resend.com/emails", {
     method: "POST",
-    headers: {
-      "Authorization": `Bearer ${RESEND_API_KEY}`,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: FROM_ADDRESS,
-      to: [opts.to],
-      subject: opts.subject,
-      html: opts.html,
-      text: opts.text,
-    }),
+    headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ from: FROM_ADDRESS, to: [opts.to], subject: opts.subject, html: opts.html, text: opts.text }),
   });
-  if (!res.ok) {
-    const body = await res.text();
-    throw new Error(`Resend ${res.status}: ${body}`);
-  }
+  if (!res.ok) throw new Error(`Resend ${res.status}: ${await res.text()}`);
 }
 
 function buildEmailHtml(verifyUrl: string, recipientEmail: string): string {
-  const year = new Date().getFullYear();
-  return `<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Sign in to Synapex</title></head>
-<body style="margin:0;padding:0;background-color:#0a0a0a;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#0a0a0a;">
-<tr><td align="center" style="padding:40px 16px;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px;">
-<tr><td style="background:linear-gradient(135deg,#111 0%,#0d0d0d 100%);border-radius:20px 20px 0 0;border:1px solid rgba(255,255,255,0.08);border-bottom:none;padding:36px 40px 32px;">
-<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr>
-<td><table cellpadding="0" cellspacing="0" border="0"><tr>
-<td style="width:36px;height:36px;background:linear-gradient(135deg,#6366f1 0%,#8b5cf6 100%);border-radius:10px;text-align:center;vertical-align:middle;"><span style="color:#fff;font-size:18px;font-weight:800;letter-spacing:-1px;line-height:36px;">S</span></td>
-<td style="padding-left:10px;vertical-align:middle;"><span style="color:#ffffff;font-size:15px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;">SYNAPEX</span></td>
-</tr></table></td>
-<td align="right" style="vertical-align:middle;"><span style="display:inline-block;background:rgba(99,102,241,0.12);border:1px solid rgba(99,102,241,0.3);color:#a5b4fc;font-size:11px;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;padding:4px 12px;border-radius:999px;">Developer Network</span></td>
-</tr></table>
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:28px;"><tr><td style="height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);"></td></tr></table>
-</td></tr>
-<tr><td style="background:#0d0d0d;border-left:1px solid rgba(255,255,255,0.08);border-right:1px solid rgba(255,255,255,0.08);padding:40px 40px 36px;">
-<p style="margin:0 0 8px;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.03em;line-height:1.2;">Your sign-in link<br/>is ready.</p>
-<p style="margin:0 0 32px;font-size:14px;color:rgba(255,255,255,0.45);line-height:1.7;">Hi <strong style="color:rgba(255,255,255,0.7);">${recipientEmail}</strong>, click the button below to sign in to the Synapex Developer Network. No password needed.</p>
-<table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:32px;"><tr><td style="background:#ffffff;border-radius:999px;">
-<a href="${verifyUrl}" style="display:inline-block;padding:14px 32px;background:#ffffff;color:#000000;font-size:14px;font-weight:700;text-decoration:none;border-radius:999px;letter-spacing:0.01em;">Sign in to Synapex &nbsp;→</a>
-</td></tr></table>
-<table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:32px;"><tr>
-<td style="width:50%;padding-right:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 16px;">
-<p style="margin:0 0 3px;font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.12em;text-transform:uppercase;">Expires in</p><p style="margin:0;font-size:15px;font-weight:600;color:#ffffff;">30 minutes</p>
-</td></tr></table></td>
-<td style="width:50%;padding-left:8px;"><table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:14px 16px;">
-<p style="margin:0 0 3px;font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.12em;text-transform:uppercase;">Single use</p><p style="margin:0;font-size:15px;font-weight:600;color:#ffffff;">One click only</p>
-</td></tr></table></td>
-</tr></table>
-<table width="100%" cellpadding="0" cellspacing="0" border="0"><tr><td style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);border-radius:10px;padding:14px 16px;">
-<p style="margin:0 0 6px;font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;text-transform:uppercase;">Button not working? Paste this link</p>
-<p style="margin:0;font-size:11px;color:rgba(255,255,255,0.4);word-break:break-all;line-height:1.5;">${verifyUrl}</p>
-</td></tr></table>
-</td></tr>
-<tr><td style="background:#080808;border-radius:0 0 20px 20px;border:1px solid rgba(255,255,255,0.08);border-top:none;padding:28px 40px;">
-<p style="margin:0 0 4px;font-size:11px;color:rgba(255,255,255,0.25);line-height:1.6;">Synapex Developers — Building software that matters.</p>
-<p style="margin:0;font-size:11px;color:rgba(255,255,255,0.18);">If you didn't request this email, you can safely ignore it. © ${year} Synapex.</p>
-</td></tr>
-</table></td></tr></table>
-</body></html>`;
+  const body = `
+<h1 style="margin:0 0 14px;font-size:26px;font-weight:700;color:#ffffff;letter-spacing:-0.025em;line-height:1.2;">Sign in to Synapex</h1>
+<p style="margin:0 0 28px;font-size:14px;color:#9a9aa3;line-height:1.65;">Hi <span style="color:#cfcfd6;">${recipientEmail}</span> — click the button below to sign in to your Synapex account. No password needed.</p>
+${button("Sign in to Synapex →", verifyUrl)}
+<div style="height:28px;line-height:28px;font-size:0;">&nbsp;</div>
+${infoChips({ label: "Expires in", value: "30 minutes" }, { label: "Single use", value: "One click only" })}
+<div style="height:24px;line-height:24px;font-size:0;">&nbsp;</div>
+<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:10px;padding:14px 16px;">
+  <p style="margin:0 0 6px;font-size:10px;color:#6b6b73;letter-spacing:0.12em;text-transform:uppercase;font-weight:500;">Trouble with the button? Copy this link</p>
+  <p style="margin:0;font-size:11px;color:#8a8a93;word-break:break-all;line-height:1.55;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;">${verifyUrl}</p>
+</div>
+<p style="margin:28px 0 0;font-size:12px;color:#6b6b73;line-height:1.6;">If you didn't request this email, you can safely ignore it — no account changes will be made.</p>
+`;
+  return renderEmail(body, { preheader: "Your one-time sign-in link to Synapex (expires in 30 minutes)." });
 }
 
 Deno.serve(async (req) => {
@@ -125,7 +86,7 @@ Deno.serve(async (req) => {
       to: cleanEmail,
       subject: "Your Synapex sign-in link",
       html: buildEmailHtml(verifyUrl, cleanEmail),
-      text: `Sign in to Synapex Developer Network\n\nClick this link to sign in (expires in 30 minutes):\n${verifyUrl}\n\nIf you didn't request this, ignore this email.\n\n© ${new Date().getFullYear()} Synapex`,
+      text: `Sign in to Synapex\n\nClick this link to sign in (expires in 30 minutes):\n${verifyUrl}\n\nIf you didn't request this, ignore this email.\n\n© ${new Date().getFullYear()} Synapex`,
     });
 
     return new Response(JSON.stringify({ ok: true }), {
